@@ -4,16 +4,14 @@ public class Tile : MonoBehaviour
 {
     // GAME OBJECTS
     public ObjectReferences Refs;
-    public Transform BackTF;
-    public Transform FrontTF;
+    public Transform FaceTF;
 
     public int ID;
 
     private void Awake()
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
-        BackTF = transform.GetChild(0);
-        FrontTF = transform.GetChild(1);
+        FaceTF = transform.GetChild(0);
     }
 
     // NumberDragon OVERLOAD
@@ -44,18 +42,6 @@ public class Tile : MonoBehaviour
     {
         string name = GetComponent<ITile>().SetName();
         GetComponent<ITile>().SetFace(name);
-    }
-
-    public void ShowFront()
-    {
-        FrontTF.gameObject.SetActive(true);
-        BackTF.gameObject.SetActive(false);
-    }
-
-    public void ShowBack()
-    {
-        FrontTF.gameObject.SetActive(false);
-        BackTF.gameObject.SetActive(true);
     }
 
     public void MoveTile(Transform toLoc, int toPos = -1)

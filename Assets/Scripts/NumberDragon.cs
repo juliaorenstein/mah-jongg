@@ -46,7 +46,7 @@ public class NumberDragon : MonoBehaviour, ITile
 
     public void SetFace(string name)
     {
-        T.FrontTF.GetComponent<Image>().sprite
+        T.FaceTF.GetComponent<Image>().sprite
             = Resources.Load<Sprite>($"Tile Faces/{name}");
     } 
 }

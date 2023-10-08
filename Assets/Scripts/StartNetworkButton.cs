@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ButtonBehaviour : MonoBehaviour, IPointerClickHandler
+public class StartNetworkButton : MonoBehaviour, IPointerClickHandler
 {
     private Spawner spawner;
 

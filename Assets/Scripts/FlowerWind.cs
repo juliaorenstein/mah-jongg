@@ -44,14 +44,14 @@ public class FlowerWind : MonoBehaviour, ITile
                 _ => "Error"
             };
 
-            T.FrontTF.GetComponent<Image>().sprite
+            T.FaceTF.GetComponent<Image>().sprite
                 = Resources.Load<Sprite>($"Tile Faces/{spriteName}");
         }
 
         else
         {
             spriteName = name;
-            T.FrontTF.GetComponent<Image>().sprite
+            T.FaceTF.GetComponent<Image>().sprite
                 = Resources.Load<Sprite>($"Tile Faces/{spriteName}");
         }
     }

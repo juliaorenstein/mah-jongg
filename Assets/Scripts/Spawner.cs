@@ -44,7 +44,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
-        Debug.Log("Connect Failed");
+        Debug.Log("OnConnectFailed");
     }
 
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
@@ -60,7 +60,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         // LOGGED ON CLIENT WHEN CLIENT JOINS
         
         Debug.Log("OnPlayerJoined");
-        Setup.SetupGame(runner, player);
+        Setup.SetupGame(player);
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }

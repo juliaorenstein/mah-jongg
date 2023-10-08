@@ -1,17 +1,21 @@
 using System.Collections.Generic;
+using System.Threading;
 using Fusion;
 using UnityEngine;
+
 
 public class Setup : NetworkBehaviour
 {
     // GAME OBJECTS
     public ObjectReferences Refs;
-    private TileManager TManager;
+    private GameManager GManager;
     private Transform TilePool;
+    private Transform OtherRacksTF;
     private Transform LocalRackPrivateTF;
 
     // PREFABS
-    private GameObject TilePrefab;
+    private GameObject TilePF;
+    private GameObject TileBackPF;
 
     // OTHER FIELDS
     public int TileID;
@@ -19,46 +23,62 @@ public class Setup : NetworkBehaviour
     public IList<GameObject> TileList;      // Everyone sees this list to know what tiles exist
     public Stack<GameObject> Wall;          // Host sees this stack to deal and draw
     private List<List<GameObject>> Racks;   // Host deals out to racks, each client sees one
-    private List<GameObject> LocalTiles;     // Each client has their own rack in this variable
+    private List<GameObject> LocalTiles;    // Each client has their own rack in this variable
 
     void Awake()
     {   // INITIALIZE FIELDS
         TileID = 0;
         tileList = new();
-        Racks = new();
+        GManager = Refs.GameManager.GetComponent<GameManager>();
+        Racks = GManager.Racks;
+        TileList = GManager.TileList;
         LocalTiles = Refs.EventSystem.GetComponent<TileManager>().LocalTiles;
         TilePool = Refs.TilePool.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
-        TilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
+        OtherRacksTF = Refs.OtherRacks.transform;
+        TilePF = Resources.Load<GameObject>("Prefabs/Tile");
+        TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
     }
 
-    public void SetupGame(NetworkRunner runner, PlayerRef player)
+    public void SetupGame(PlayerRef player)
     {
-        int[] tilesToSend;
-
-        // FIRST LOCAL PLAYER CREATES TILES
-        CreateTiles();
-
-        // SERVER & LOCAL PLAYER: SHUFFLE AND DEAL
-        if (runner.IsServer && runner.LocalPlayer == player)
+        GManager.PlayerDict[player.PlayerId] = player;
+        GManager.Dealer = 3;                    // make the server the dealer
+        CreateTiles();                          // everyone creates the tiles
+        if (Runner.IsServer && Runner.LocalPlayer == player)
         {
-            Shuffle();
-            Deal();
-            // new comment
+            Shuffle();                          // server shuffles
+            Deal();                             // server deals
         }
+        if (Runner.IsServer)    
+        {                                       // server deals to clients
+            int[] tileArr = PrepRackForClient(player.PlayerId);         
+            RpcInvokeInfo info = RPC_SendRackToPlayer(player, tileArr);
 
-        // SERVER: POPULATE LOCAL PLAYER'S RACK
-        if (runner.IsServer)
-        {
-            tilesToSend = PrepRack(player.PlayerId);
-            RpcInvokeInfo info = RPC_SendRackToPlayer(player, tilesToSend);
+            // this is scrappy but i can't figure out why sometimes the host's
+            // PlayerId is -1 and sometimes 3. So I'm adding -1 to the
+            // dictionary as well as a duplicate value
+            GManager.PlayerDict[-1] = player;
         }
+        if (Runner.LocalPlayer == player)           
+        {
+            HideButtons();                      // hide start buttons
+            PopulateOtherRacks();               // show the other player's racks
+        }
+    }
 
-        // LOCAL PLAYER: TURN OFF START BUTTON
-        if (runner.LocalPlayer == player)
-        {
-            Refs.StartButton.SetActive(false);
-        }
+    // overload w/ 0 parameters for offline play
+    public void SetupGame()
+    {
+        GManager.Dealer = 0;                    // set dealer
+        GManager.Offline = true;                // this check will be handy
+        CreateTiles();                          // create tiles
+        Shuffle();                              // shuffle
+        Deal();                                 // deal
+        int[] tileArr = PrepRackForClient(3);   // get tiles on rack
+        PopulateLocalRack(tileArr);             // populate 'em
+        HideButtons();                          // hide start buttons
+        PopulateOtherRacks();                   // show the other player's racks
     }
 
     public void CreateTiles()
@@ -67,13 +87,13 @@ public class Setup : NetworkBehaviour
         CreateFlowerWinds();
         CreateJokers();
 
-        // CREATE REFERENCE LIST FOR EVERYONE
+        // create reference list for everyone
         TileList = tileList.AsReadOnly();
     }
 
     Tile CreateOneTile()
     {
-        Tile tile = Instantiate(TilePrefab, TilePool).GetComponent<Tile>();
+        Tile tile = Instantiate(TilePF, TilePool).GetComponent<Tile>();
         tile.GetComponent<Tile>().ID = TileID;
         tileList.Add(tile.gameObject);
         TileID++;
@@ -161,7 +181,7 @@ public class Setup : NetworkBehaviour
     }
 
     // PREPARE A LIST OF TILE IDS TO SEND TO CLIENT FOR RPC_SendRackToPlayer
-    int[] PrepRack(int playerID)
+    int[] PrepRackForClient(int playerID)
     {
         List<int> RackTileIDs = new();
         foreach (GameObject tile in Racks[playerID])
@@ -171,18 +191,48 @@ public class Setup : NetworkBehaviour
         return RackTileIDs.ToArray();
     }
 
-    [Rpc(sources: RpcSources.StateAuthority, targets: RpcTargets.All)]
-    public RpcInvokeInfo RPC_SendRackToPlayer([RpcTarget] PlayerRef player, int[] tileArr)
+    [Rpc]
+    public RpcInvokeInfo RPC_SendRackToPlayer([RpcTarget] PlayerRef _, int[] tileArr)
     {
         Debug.Log("RPC");
+        PopulateLocalRack(tileArr);
+        return default;
+    }
+
+    void PopulateLocalRack(int[] tileArr)
+    {
         GameObject tile;
         foreach (int tileID in tileArr)
         {
             tile = TileList[tileID];
             LocalTiles.Add(tile);
             tile.transform.SetParent(LocalRackPrivateTF);
-            tile.GetComponent<Tile>().ShowFront();
+        } 
+    }
+
+    void HideButtons()
+    {
+        Refs.StartButtons.SetActive(false);
+    }
+
+    void PopulateOtherRacks()
+    {
+        // TODO: Remake tile prefab and fix references so that we can just have the front
+        // FIXME: Tiles are too big and stretching the otherracks vertically
+
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 13; j++)
+            {
+                Instantiate(TileBackPF, OtherRacksTF.GetChild(i).GetChild(1));
+            }
         }
-        return default;
-    }    
+
+        // one more tile for the dealer if this isn't the server/dealer
+        if ((GManager.Offline && GManager.Dealer < 3)
+            || GManager.Dealer == Runner.LocalPlayer.PlayerId)
+        {
+            Instantiate(TileBackPF, OtherRacksTF.GetChild(0).GetChild(1));
+        }
+    }
 }

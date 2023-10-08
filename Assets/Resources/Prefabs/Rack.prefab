@@ -217,7 +217,7 @@ MonoBehaviour:
     m_Bottom: 2
   m_ChildAlignment: 0
   m_Spacing: 2
-  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
   m_ChildControlHeight: 1
@@ -236,6 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eabe5dcabdad0404bb9513e1cecd556a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Positions: []
 --- !u!1 &8999136052567582214
 GameObject:
   m_ObjectHideFlags: 0

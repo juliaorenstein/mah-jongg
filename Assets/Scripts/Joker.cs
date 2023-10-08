@@ -19,7 +19,7 @@ public class Joker : MonoBehaviour, ITile
 
     public void SetFace(string name)
     {
-        T.FrontTF.GetComponent<Image>().sprite
+        T.FaceTF.GetComponent<Image>().sprite
             = Resources.Load<Sprite>("Tile Faces/Joker");
     }
 }
