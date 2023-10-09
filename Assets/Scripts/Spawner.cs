@@ -4,6 +4,7 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Threading;
 
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -12,10 +13,12 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     private ObjectReferences Refs;
     private NetworkRunner runner;
     private Setup Setup;
+    private GameObject DealMe;
 
     private void Awake()
     {   // INITIALIZE GAME OBJECT FIELDS
         Setup = Refs.GameManager.GetComponent<Setup>();
+        DealMe = Refs.DealMe;
     }
 
     public async void StartGame(GameMode mode)
@@ -60,9 +63,10 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         // LOGGED ON CLIENT WHEN CLIENT JOINS
         
         Debug.Log("OnPlayerJoined");
-        Setup.SetupGame(player);
+        if (player == runner.LocalPlayer) { Setup.SetupGame(player); }
+        else if (runner.IsServer ) { DealMe.SetActive(true); }
     }
-
+    
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data) { }
     public void OnSceneLoadDone(NetworkRunner runner) { }

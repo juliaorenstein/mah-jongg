@@ -9,6 +9,7 @@ public class Setup : NetworkBehaviour
     // GAME OBJECTS
     public ObjectReferences Refs;
     private GameManager GManager;
+    private NetworkRunner NRunner;
     private Transform TilePool;
     private Transform OtherRacksTF;
     private Transform LocalRackPrivateTF;
@@ -42,29 +43,32 @@ public class Setup : NetworkBehaviour
 
     public void SetupGame(PlayerRef player)
     {
+        NRunner = Refs.Runner.GetComponent<NetworkRunner>();
         GManager.PlayerDict[player.PlayerId] = player;
         GManager.Dealer = 3;                    // make the server the dealer
         CreateTiles();                          // everyone creates the tiles
-        if (Runner.IsServer && Runner.LocalPlayer == player)
+
+        if (NRunner.IsServer && NRunner.LocalPlayer == player)
         {
             Shuffle();                          // server shuffles
             Deal();                             // server deals
         }
-        if (Runner.IsServer)    
+        if (NRunner.IsServer)    
         {                                       // server deals to clients
-            int[] tileArr = PrepRackForClient(player.PlayerId);         
-            RpcInvokeInfo info = RPC_SendRackToPlayer(player, tileArr);
-
-            // this is scrappy but i can't figure out why sometimes the host's
-            // PlayerId is -1 and sometimes 3. So I'm adding -1 to the
-            // dictionary as well as a duplicate value
-            GManager.PlayerDict[-1] = player;
+            int[] tileArr = PrepRackForClient(player.PlayerId);
+            RpcInvokeInfo info = RPC_SendRackToPlayer(tileArr);
+            Debug.Log(info.SendResult + " player: " + player.PlayerId);
         }
-        if (Runner.LocalPlayer == player)           
+        if (NRunner.LocalPlayer == player)           
         {
             HideButtons();                      // hide start buttons
             PopulateOtherRacks();               // show the other player's racks
         }
+    }
+
+    void HostSetup(NetworkRunner runner, PlayerRef player)
+    {   // called from OnPlayerJoined on host machine
+        
     }
 
     // overload w/ 0 parameters for offline play
@@ -192,9 +196,9 @@ public class Setup : NetworkBehaviour
     }
 
     [Rpc]
-    public RpcInvokeInfo RPC_SendRackToPlayer([RpcTarget] PlayerRef _, int[] tileArr)
+    public RpcInvokeInfo RPC_SendRackToPlayer(int[] tileArr, RpcInfo info = default)
     {
-        Debug.Log("RPC");
+        Debug.Log("RPC" + " " + info);
         PopulateLocalRack(tileArr);
         return default;
     }
@@ -230,7 +234,7 @@ public class Setup : NetworkBehaviour
 
         // one more tile for the dealer if this isn't the server/dealer
         if ((GManager.Offline && GManager.Dealer < 3)
-            || GManager.Dealer == Runner.LocalPlayer.PlayerId)
+            || GManager.Dealer == NRunner.LocalPlayer.PlayerId)
         {
             Instantiate(TileBackPF, OtherRacksTF.GetChild(0).GetChild(1));
         }
