@@ -44,19 +44,10 @@ public class Tile : MonoBehaviour
         GetComponent<ITile>().SetFace(name);
     }
 
-    public void MoveTile(Transform toLoc, int toPos = -1)
-    {   // TODO: REWRITE
-        /*
-        if (toLoc.parent == RacksTF)
-        {
-            MoveTileToRack(toLoc, toPos);
-        }
-
-        else if (toLoc == WallTF)
-        {
-            MoveTileToDiscard(toLoc);
-        }
-        */
+    // just points over to child's TileLocomotion component's MoveTile
+    public void MoveTile(Transform toLoc)
+    {
+        GetComponentInChildren<TileLocomotion>().MoveTile(toLoc);
     }
 
     private void MoveTileToRack(Transform rack, int toPos)

@@ -10,6 +10,7 @@ public class DealClient : NetworkBehaviour
     public ObjectReferences Refs;
     private Setup Setup;
     private NetworkRunner NRunner;
+    public PlayerRef Player;
 
     private void Awake()
     {
@@ -20,7 +21,7 @@ public class DealClient : NetworkBehaviour
     public void OnPointerClick(PointerEventData eventData)
     {
         gameObject.SetActive(false);
-        Setup.SetupGame(NRunner.LocalPlayer);
+        Setup.SetupGame(NRunner, Player);
     }
     /*
     [Rpc]

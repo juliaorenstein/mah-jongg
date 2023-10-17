@@ -3,22 +3,28 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.Networking.Types;
 
 public class Charleston : NetworkBehaviour
 {
     public ObjectReferences Refs;
     private Button PassButton;
+    private CharlestonPassButton PassButtonScript;
     private GameManager GManager;
+    private NetworkRunner runner;
     private Transform RackPrivateTF;
     private Transform TilePoolTF;
     private int[] TilesToPass = new int[3];
     private int[][] PassArr = new int[4][];
     private int Counter = 0;
+    public string Direction = "Right";
     private int PlayersReady = 0;
 
     private void Awake()
     {
         PassButton = Refs.CharlestonPassButton.GetComponent<Button>();
+        PassButtonScript = PassButton.GetComponent<CharlestonPassButton>();
         GManager = Refs.GameManager.GetComponent<GameManager>();
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         TilePoolTF = Refs.TilePool.transform;
@@ -26,7 +32,8 @@ public class Charleston : NetworkBehaviour
 
     private void Start()
     {   // if playing online, everybody except local player is ready to pass
-        if (GManager.Offline) { PlayersReady = 3; }
+        // don't think i actually need this
+        // if (GManager.Offline) { PlayersReady = 3; }
     }
 
     public void CheckDone()
@@ -47,19 +54,36 @@ public class Charleston : NetworkBehaviour
         else { PassButton.interactable = false; }
     }
     
-    public void Pass()
+    public void StartPassFromLocal()
     {   // on local machine, put pass tiles back into the TilePool
         // kick off the rest of the pass via RPC
 
         // TODO: account for optional charlestons
 
-        for (int i = 0; i < 3; i++)     
+        // first set up runner
+        if (Counter == 0 && !GManager.Offline)
         {
+            runner = Refs.Runner.GetComponent<NetworkRunner>();
+        }
+
+        UpdateDirection();
+        for (int i = 0; i < 3; i++)     
+        {   
             Tile tile = transform.GetChild(i).GetChild(0).GetComponent<Tile>();
             TilesToPass[i] = tile.ID;   // set array of tiles to pass
-            tile.MoveTile(TilePoolTF);  // move tile to TilePool for local player
-            if (!GManager.Offline) { RPC_PlayerReady(TilesToPass); }
+            // move tile to TilePool for local player
+            tile.MoveTile(TilePoolTF);  
         }
+
+        // kick off when host is ready on the first pass. After that, do it at
+        // the end of each Charleston.
+        if (Counter == 0 && (GManager.Offline || runner.IsServer)) { AIMechanics(); }
+
+        // if offline, skip to the actual pass
+        if (GManager.Offline) { HostPassLogic(); }
+        // if networked send player ready to host
+        else { RPC_PlayerReady(TilesToPass); }
+
     }
 
     // from player to host
@@ -74,19 +98,52 @@ public class Charleston : NetworkBehaviour
         PassArr[rpcInfo.Source.PlayerId] = tiles;
 
         // if all players are ready, kick off the actual pass
-        if (PlayersReady == 4) { PassOnHost(); }
+        if ( PlayersReady == 4 ) { HostPassLogic(); }
     }
 
-    void PassOnHost()
-    {
-        for (int sourceID = 0; sourceID < 4; sourceID++)
+    void HostPassLogic()
+    {   // move tiles on the racklists, then switch around the gameobjects to match
+        // TODO: blind pass logic
+        // TODO: optional pass logic
+        // TODO: disallow passing jokers
+        // TODO: double-click functionality
+        // FIXME: things are not working
+        foreach (List<GameObject> rack in GManager.Racks)
         {
-            int targetID = PassTargetID(sourceID);
-            PlayerRef targetRef = GManager.PlayerDict[targetID];
-            UpdateRackLists(sourceID, targetID, PassArr[sourceID]);
-            if (!GManager.Offline)
-                { RPC_ReceiveTiles(targetRef, PassArr[sourceID]); }
+            string rackStr = $"rack {GManager.Racks.IndexOf(rack)}: ";
+            foreach(GameObject tileGO in rack)
+            {
+                rackStr += tileGO.name + ", ";
+            }
+            Debug.Log(rackStr);
         }
+        
+        for (int sourceID = 0; sourceID < 4; sourceID++)
+        {   // update lists
+            int targetID = PassTargetID(sourceID);
+            UpdateRackLists(sourceID, targetID, PassArr[sourceID]);
+
+            // if online, update rack gameobject for each player
+            if (!GManager.Offline)
+            {
+                PlayerRef targetRef = GManager.PlayerDict[targetID];
+                RPC_ReceiveTiles(targetRef, PassArr[sourceID]);
+            }
+
+            // if offline, update rack gameobject when targetID=3
+            if (targetID == 3 && GManager.Offline)
+            {
+                ReceiveTiles(PassArr[sourceID]);
+            }
+        }
+
+        Counter++;                          // increase charleston counter
+        if (Counter == 7) { Counter = -1; }
+        // TODO: expand logic to set Counter to -1 when players quit after first
+        // three passes or don't do optional.
+        UpdateDirection();
+        PassButtonScript.UpdateButton(Counter);    // update button text
+        AIMechanics();                      // start the next pass on the AIs.
     }
 
     void UpdateRackLists(int sourceID, int targetID, int[] tileIDs)
@@ -107,10 +164,15 @@ public class Charleston : NetworkBehaviour
     [Rpc (RpcSources.StateAuthority, RpcTargets.All, TickAligned = false)]
     public void RPC_ReceiveTiles([RpcTarget] PlayerRef _, int[] tiles)
     {
+        ReceiveTiles(tiles);
+    }
+
+    public void ReceiveTiles(int[] tiles)
+    {
         foreach (int ID in tiles)
         {
             GManager.TileList[ID]
-                    .GetComponent<TileLocomotion>()
+                    .GetComponentInChildren<TileLocomotion>()
                     .MoveTile(RackPrivateTF);
         }
     }
@@ -121,21 +183,63 @@ public class Charleston : NetworkBehaviour
         // player id and the charleston counter
         int shift;
 
+        switch (Direction)
+        {
+            case "Right":
+                shift = 1;    
+                break;
+            case "Across":
+                shift = 2;
+                break;
+            default:
+                shift = 3;
+                break;
+        }
+        return (sourceID + shift) % 4;
+    }
+
+    void UpdateDirection()
+    {
         switch (Counter)
         {
             case 0:         // first right
             case 5:         // second right
-                shift = 1;
+                Direction = "Right";
                 break;
             case 1:         // first across
             case 4:         // second across
             case 6:         // optional
-                shift = 2;  
+                Direction = "Across";
                 break;
-            default:        // first and second left
-                shift = -1; 
+            case 2:         // first left
+            case 3:         // second left
+                Direction = "Left";
+                break;
+            default:
+                Direction = "Done";
                 break;
         }
-        return (sourceID + shift) % 4;
+    }
+
+    void AIMechanics()
+    {
+        foreach (int key in GManager.PlayerDict.Keys)
+        {
+            if (GManager.PlayerDict[key] == PlayerRef.None)
+            {
+                ChooseTilesForAI(key);
+                PlayersReady++;
+            }
+        }
+    }
+
+    void ChooseTilesForAI(int rackID)
+    {
+        // for now just choose the first three.
+        // TODO: Make the AI smart
+        PassArr[rackID] = GManager.Racks[rackID]
+                         .GetRange(0, 3)
+                         .Select(tileGO => tileGO.GetComponent<Tile>().ID)
+                         .ToArray();
     }
 }

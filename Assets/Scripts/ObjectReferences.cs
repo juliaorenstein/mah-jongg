@@ -16,4 +16,5 @@ public class ObjectReferences : MonoBehaviour
     public GameObject Dragging;
     public GameObject CharlestonBox;
     public GameObject CharlestonPassButton;
+    public GameObject Discard;
 }

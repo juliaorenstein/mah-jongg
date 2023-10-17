@@ -63,8 +63,13 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         // LOGGED ON CLIENT WHEN CLIENT JOINS
         
         Debug.Log("OnPlayerJoined");
-        if (player == runner.LocalPlayer) { Setup.SetupGame(player); }
-        else if (runner.IsServer ) { DealMe.SetActive(true); }
+        if (player == runner.LocalPlayer) { Setup.SetupGame(runner, player); }
+        else if (runner.IsServer )
+        {
+
+            DealMe.GetComponent<DealClient>().Player = player;
+            DealMe.SetActive(true);
+        }
     }
     
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }

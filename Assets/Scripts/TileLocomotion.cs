@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TileLocomotion : MonoBehaviour
+    , IPointerClickHandler
     , ISelectHandler
     , IBeginDragHandler
     , IDragHandler
@@ -19,6 +20,8 @@ public class TileLocomotion : MonoBehaviour
     private Image TileImage;
     private Transform DraggingTF;
     private Transform CharlestonBoxTF;
+    private Transform DiscardTF;
+    private TurnManager TManager;
 
     private void Awake()
     {
@@ -29,6 +32,52 @@ public class TileLocomotion : MonoBehaviour
         TileImage = GetComponent<Image>();
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.CharlestonBox.transform;
+        DiscardTF = Refs.Discard.transform;
+        TManager = Refs.GameManager.GetComponent<TurnManager>();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Transform tileTF = eventData.pointerClick.transform;
+        if (eventData.clickCount == 2)
+        {
+            if (CharlestonBoxTF.gameObject.activeSelf)
+            { DoubleClickCharleston(tileTF); }
+            else { DoubleClickDiscard(tileTF); }
+        }
+    }
+
+    private void DoubleClickCharleston(Transform tileTF)
+    {
+        if (tileTF.IsChildOf(RackPrivateTF))
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Transform chSpot = CharlestonBoxTF.GetChild(i);
+                if (chSpot.childCount == 0)
+                {
+                    tileTF.GetComponent<TileLocomotion>().MoveTile(chSpot);
+                    break;
+                }
+            }
+            if (tileTF.IsChildOf(RackPrivateTF))
+            {
+                CharlestonBoxTF.GetChild(2).GetChild(0).GetChild(0)
+                               .GetComponent<TileLocomotion>()
+                               .MoveTile(RackPrivateTF);
+                tileTF.GetComponent<TileLocomotion>()
+                      .MoveTile(CharlestonBoxTF.GetChild(2));
+            }
+
+            CharlestonBoxTF.GetComponent<Charleston>().CheckDone();
+        }
+        //FIXME: is the else statement too broad?
+        else { tileTF.GetComponent<TileLocomotion>().MoveTile(RackPrivateTF); }
+    }
+
+    private void DoubleClickDiscard(Transform tileTF)
+    {
+        TManager.Discard(tileTF);
     }
 
     public void OnSelect(BaseEventData eventData) { }
@@ -54,17 +103,23 @@ public class TileLocomotion : MonoBehaviour
         // get list of things we're on top of
         List<RaycastResult> raycastResults = new();
         ESystem.RaycastAll(eventData, raycastResults);
-        IEnumerable<Transform> raycastTFs;
-        raycastTFs = raycastResults.Select(res => res.gameObject.transform);
+        IEnumerable<Transform> raycastTFs
+            = raycastResults.Select(res => res.gameObject.transform);
         float dropXPos = eventData.pointerDrag.transform.position.x;
         
-        // if position is on rack, drop the tile at new position
+        // drop on rack
         if (raycastTFs.Contains(RackPrivateTF)) { DropOnRack(dropXPos); }
 
-        // if we're dropping to charleston (but not the border of the box), drop there.
+        // drop on charleston
         else if (raycastTFs.Contains(CharlestonBoxTF)
             && eventData.pointerCurrentRaycast.gameObject != CharlestonBoxTF.gameObject)
             { DropOnCharleston(eventData); }
+
+        // discard
+        else if (raycastTFs.Contains(DiscardTF))
+        {
+            TManager.Discard(transform);
+        }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
@@ -137,6 +192,8 @@ public class TileLocomotion : MonoBehaviour
         if (newParentTF != RackPrivateTF) { tileTF.position = newParentTF.position; }
         tileTF.SetSiblingIndex(newSibIx);
         tileTF.GetChild(0).position = tileTF.position;
+
+        // TODO: add racklist management?
     }
 
     // overload without a sibling index. sends tile to last spot
@@ -145,11 +202,13 @@ public class TileLocomotion : MonoBehaviour
         MoveTile(newParent, newParent.childCount);
     }
 
-    public static void SetFaceBackToParent(PointerEventData eventData)
+    /* deprecate?
+    private static void SetFaceBackToParent(PointerEventData eventData)
     {
         Transform faceTF = eventData.pointerDrag.transform;
         Transform tileTF = eventData.pointerDrag.GetComponent<TileLocomotion>().TileTF;
         faceTF.SetParent(tileTF);
         faceTF.position = tileTF.position;
     }
+    */
 }

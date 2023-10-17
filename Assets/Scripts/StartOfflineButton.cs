@@ -10,6 +10,6 @@ public class StartOfflineButton : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameObject.Find("GameManager").GetComponent<Setup>().SetupGame();
+        GameObject.Find("GameManager").GetComponent<Setup>().SetupOfflineGame();
     }
 }
