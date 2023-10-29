@@ -5,12 +5,11 @@ using Fusion;
 using UnityEngine.UI;
 using System.Linq;
 
-public class TurnManager : NetworkBehaviour
+public class TurnManager : MonoBehaviour
 {
     public ObjectReferences Refs;
     private GameManager GManager;
-    [Networked]
-    public int TurnPlayerID { get; set; }
+    private int TurnPlayerID;
     private Transform DiscardTF;
     private Transform LocalRackPrivateTF;
 
@@ -20,11 +19,9 @@ public class TurnManager : NetworkBehaviour
         DiscardTF = Refs.Discard.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         TurnPlayerID = GManager.Dealer;
-        // FIXME: Error when accessing TurnManager.TurnPlayerID.
-        // Networked properties can only be accessed when Spawned() has been called.
     }
 
-    public void FirstTurn()
+    public void StartGamePlay()
     {
         DiscardTF.gameObject.SetActive(true);
         if (IsMyTurn()) { EnableDiscard(); }
@@ -33,6 +30,7 @@ public class TurnManager : NetworkBehaviour
     public void Discard(Transform tileTF)
     {
         // FIXME: Create an overload that takes tileID
+
         // Move the tile to the Discard area
         int tileID = tileTF.parent.GetComponent<Tile>().ID;
 
@@ -41,6 +39,7 @@ public class TurnManager : NetworkBehaviour
             ShowTileInDiscard(tileTF);
             NextTurnHost(tileTF.parent.GetComponent<Tile>().ID);
         }
+
         else
         {
             RPC_ShowTileInDiscard(tileID);
@@ -50,14 +49,14 @@ public class TurnManager : NetworkBehaviour
         }
     }
 
-    [Rpc (RpcSources.All, RpcTargets.All)]
+    [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_ShowTileInDiscard(int tileID)
     { ShowTileInDiscard(GManager.TileList[tileID].transform.parent); }
 
     private void ShowTileInDiscard(Transform tileTF)
     {
-        tileTF.GetComponent<TileLocomotion>().MoveTile(DiscardTF);
-        tileTF.GetComponent<Image>().raycastTarget = false;
+        tileTF.GetComponentInChildren<TileLocomotion>().MoveTile(DiscardTF);
+        tileTF.GetComponentInChildren<Image>().raycastTarget = false;
     }
 
     [Rpc (RpcSources.All, RpcTargets.StateAuthority)]
@@ -89,7 +88,10 @@ public class TurnManager : NetworkBehaviour
             RPC_DisableDiscard();
             if (turnPlayer == PlayerRef.None) { AITurn(nextTileID); }
             else { RPC_NextTurnClient(turnPlayer, nextTileID); }
-        } 
+        }
+
+        //FIXME: discard is showing 3 tiles sometimes when playing single player
+        // on network, and the tiles sometimes rearrange??
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -121,7 +123,7 @@ public class TurnManager : NetworkBehaviour
     private void EnableDiscard()
     { DiscardTF.GetComponent<Image>().raycastTarget = true; }
 
-    [Rpc (RpcSources.InputAuthority, RpcTargets.All)]
+    [Rpc (RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_DisableDiscard() { DisableDiscard(); }
 
     private void DisableDiscard()

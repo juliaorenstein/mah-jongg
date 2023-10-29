@@ -13,7 +13,7 @@ public class Setup : NetworkBehaviour
     private Transform TilePool;
     private Transform OtherRacksTF;
     private Transform LocalRackPrivateTF;
-    private TurnManager TManager;
+    //private TurnManager TManager;
 
     // PREFABS
     private GameObject TilePF;
@@ -35,7 +35,7 @@ public class Setup : NetworkBehaviour
         OtherRacksTF = Refs.OtherRacks.transform;
         TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
-        TManager = GManager.GetComponent<TurnManager>();
+        //TManager = GManager.GetComponent<TurnManager>();
     }
 
     public void SetupGame(NetworkRunner runner, PlayerRef player)
@@ -61,6 +61,7 @@ public class Setup : NetworkBehaviour
 
         if (_runner.IsServer)  
         {                                       // server deals to clients
+            
             int[] tileArr = PrepRackForClient(player.PlayerId);
             RPC_SendRackToPlayer(player, tileArr);
         }
