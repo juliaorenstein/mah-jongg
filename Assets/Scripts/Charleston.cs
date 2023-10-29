@@ -59,7 +59,6 @@ public class Charleston : NetworkBehaviour
         // kick off the rest of the pass via RPC
 
         // TODO: account for optional charlestons
-
         // first set up runner
         if (Counter == 0 && !GManager.Offline)
         {
@@ -106,8 +105,7 @@ public class Charleston : NetworkBehaviour
         // TODO: blind pass logic
         // TODO: optional pass logic
         // TODO: disallow passing jokers
-        // TODO: double-click functionality
-        // FIXME: things are not working
+        PlayersReady = 0;
         foreach (List<GameObject> rack in GManager.Racks)
         {
             string rackStr = $"rack {GManager.Racks.IndexOf(rack)}: ";
@@ -127,6 +125,8 @@ public class Charleston : NetworkBehaviour
             if (!GManager.Offline)
             {
                 PlayerRef targetRef = GManager.PlayerDict[targetID];
+                // skip next step if AI so server doesn't see the tiles
+                if (targetRef == PlayerRef.None) { continue; } 
                 RPC_ReceiveTiles(targetRef, PassArr[sourceID]);
             }
 

@@ -71,14 +71,11 @@ public class TileLocomotion : MonoBehaviour
 
             CharlestonBoxTF.GetComponent<Charleston>().CheckDone();
         }
-        //FIXME: is the else statement too broad?
         else { tileTF.GetComponent<TileLocomotion>().MoveTile(RackPrivateTF); }
     }
 
     private void DoubleClickDiscard(Transform tileTF)
-    {
-        TManager.Discard(tileTF);
-    }
+    { TManager.Discard(tileTF); }
 
     public void OnSelect(BaseEventData eventData) { }
 
@@ -117,9 +114,7 @@ public class TileLocomotion : MonoBehaviour
 
         // discard
         else if (raycastTFs.Contains(DiscardTF))
-        {
-            TManager.Discard(transform);
-        }
+        { TManager.Discard(transform); }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
@@ -185,13 +180,15 @@ public class TileLocomotion : MonoBehaviour
     public void MoveTile(Transform newParentTF, int newSibIx)
     {
         Transform tileTF;
-        if (CompareTag("Tile")) tileTF = transform;
-        else tileTF = transform.parent;
+        if (CompareTag("Tile")) { tileTF = transform; }
+        else { tileTF = transform.parent; }
 
         tileTF.SetParent(newParentTF);
         if (newParentTF != RackPrivateTF) { tileTF.position = newParentTF.position; }
         tileTF.SetSiblingIndex(newSibIx);
+        tileTF.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 0);
         tileTF.GetChild(0).position = tileTF.position;
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)newParentTF);
 
         // TODO: add racklist management?
     }

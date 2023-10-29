@@ -12,6 +12,7 @@ public class Tile : MonoBehaviour
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
         FaceTF = transform.GetChild(0);
+        // FIXME: tiles don't scale correctly
     }
 
     // NumberDragon OVERLOAD
@@ -42,29 +43,12 @@ public class Tile : MonoBehaviour
     {
         string name = GetComponent<ITile>().SetName();
         GetComponent<ITile>().SetFace(name);
+        transform.GetChild(0).name = gameObject.name + " face";
     }
 
     // just points over to child's TileLocomotion component's MoveTile
     public void MoveTile(Transform toLoc)
     {
         GetComponentInChildren<TileLocomotion>().MoveTile(toLoc);
-    }
-
-    private void MoveTileToRack(Transform rack, int toPos)
-    {
-        if (toPos < 0) toPos = rack.childCount;
-        transform.SetParent(rack);
-        transform.localScale = new Vector3(1, 1, 1);
-        //transform.position = Rack.RackPosToSpot(rack.GetSiblingIndex(), toPos);
-    }
-
-    private void MoveTileToDiscard(Transform wall)
-    {
-        transform.SetParent(wall);
-    }
-
-    private void MoveTileToCharleston()
-    {
-        return;
     }
 }

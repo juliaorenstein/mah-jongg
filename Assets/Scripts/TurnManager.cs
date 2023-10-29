@@ -5,7 +5,7 @@ using Fusion;
 using UnityEngine.UI;
 using System.Linq;
 
-public class TurnManager : MonoBehaviour
+public class TurnManager : NetworkBehaviour
 {
     public ObjectReferences Refs;
     private GameManager GManager;
@@ -14,16 +14,14 @@ public class TurnManager : MonoBehaviour
     private Transform DiscardTF;
     private Transform LocalRackPrivateTF;
 
-    private void Awake()
+    private void Start()
     {
         GManager = Refs.GameManager.GetComponent<GameManager>();
         DiscardTF = Refs.Discard.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
-    }
-
-    private void Start()
-    {
         TurnPlayerID = GManager.Dealer;
+        // FIXME: Error when accessing TurnManager.TurnPlayerID.
+        // Networked properties can only be accessed when Spawned() has been called.
     }
 
     public void FirstTurn()
@@ -34,10 +32,10 @@ public class TurnManager : MonoBehaviour
 
     public void Discard(Transform tileTF)
     {
+        // FIXME: Create an overload that takes tileID
         // Move the tile to the Discard area
         int tileID = tileTF.parent.GetComponent<Tile>().ID;
-        // FIXME: the discarded tile is only showing for the player that discarded it
-        // FIXME: AIs aren't discarding the tile image
+
         if (GManager.Offline)
         {
             ShowTileInDiscard(tileTF);
@@ -45,35 +43,41 @@ public class TurnManager : MonoBehaviour
         }
         else
         {
-            RPC_ShowTileInDiscard(tileTF);
+            RPC_ShowTileInDiscard(tileID);
             RPC_NextTurnHost(tileID);
+            // FIXME: discard isn't showing on other machines during networked
+            // FIXME: need to turn raycast off on discarded tiles
         }
     }
 
     [Rpc (RpcSources.All, RpcTargets.All)]
-    public void RPC_ShowTileInDiscard(Transform tileTF)
-    { ShowTileInDiscard(tileTF); }
+    public void RPC_ShowTileInDiscard(int tileID)
+    { ShowTileInDiscard(GManager.TileList[tileID].transform.parent); }
 
     private void ShowTileInDiscard(Transform tileTF)
-    { tileTF.GetComponent<TileLocomotion>().MoveTile(DiscardTF); }
+    {
+        tileTF.GetComponent<TileLocomotion>().MoveTile(DiscardTF);
+        tileTF.GetComponent<Image>().raycastTarget = false;
+    }
 
     [Rpc (RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_NextTurnHost(int tileID, RpcInfo info = default)
+    public void RPC_NextTurnHost(int tileID)
     { NextTurnHost(tileID); }
 
     private void NextTurnHost(int tileID)
     {
-        // TODO: TurnPlayerID and playerID might be redundant
         // TODO: add support for calling tiles
 
         // remove the tile from the player's rack list
         GManager.Racks[TurnPlayerID].Remove(GManager.TileList[tileID]);
+        // FIXME: getting an error here on the client when discarding
+
         TurnPlayerID = (TurnPlayerID + 1) % 4;  // increment turn
         
         // grab the next tile on the wall to show to the next player
         int nextTileID = GManager.Wall.Pop().GetComponent<Tile>().ID;
 
-        // nitiate turn on local machine or simulate AI turn
+        // initiate turn on local machine or simulate AI turn
         if (GManager.Offline)   
         {
             if (IsMyTurn()) { NextTurnClient(nextTileID); }
@@ -82,9 +86,9 @@ public class TurnManager : MonoBehaviour
         else
         {
             PlayerRef turnPlayer = GManager.PlayerDict[TurnPlayerID];
-            if (turnPlayer == PlayerRef.None) { AITurn(tileID); }
             RPC_DisableDiscard();
-            RPC_NextTurnClient(turnPlayer, nextTileID);
+            if (turnPlayer == PlayerRef.None) { AITurn(nextTileID); }
+            else { RPC_NextTurnClient(turnPlayer, nextTileID); }
         } 
     }
 
@@ -112,7 +116,6 @@ public class TurnManager : MonoBehaviour
     {
         // for now just discard whatever was picked up
         Discard(GManager.TileList[tileID].transform.GetChild(0));
-        // FIXME: ugly line of code
     }
 
     private void EnableDiscard()

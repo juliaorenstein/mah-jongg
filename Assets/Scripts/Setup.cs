@@ -44,8 +44,14 @@ public class Setup : NetworkBehaviour
         GManager.PlayerDict[player.PlayerId] = player;
         GManager.Dealer = 3;                    // make the server the dealer
         GManager.LocalPlayerID = runner.LocalPlayer.PlayerId; // set player ID
-        if (GManager.Dealer == GManager.LocalPlayerID)
-        CreateTiles();                          // everyone creates the tiles
+                                                              //if (GManager.Dealer == GManager.LocalPlayerID)
+                                                              // everyone creates the tiles
+        if (_runner.LocalPlayer == player)
+        {
+            CreateTiles();
+            HideButtons();                      // hide start buttons
+            PopulateOtherRacks();               // show the other player's racks
+        }
 
         if (_runner.IsServer && GManager.LocalPlayerID == player)
         {
@@ -57,12 +63,6 @@ public class Setup : NetworkBehaviour
         {                                       // server deals to clients
             int[] tileArr = PrepRackForClient(player.PlayerId);
             RPC_SendRackToPlayer(player, tileArr);
-        }
-
-        if (_runner.LocalPlayer == player)           
-        {
-            HideButtons();                      // hide start buttons
-            PopulateOtherRacks();               // show the other player's racks
         }
     }
 
@@ -202,8 +202,9 @@ public class Setup : NetworkBehaviour
         {
             tile = GManager.TileList[tileID];
             LocalTiles.Add(tile);
-            tile.transform.SetParent(LocalRackPrivateTF);
-        } 
+            tile.transform.GetChild(0)
+                .GetComponent<TileLocomotion>()
+                .MoveTile(LocalRackPrivateTF);        } 
     }
 
     void HideButtons()
@@ -214,21 +215,16 @@ public class Setup : NetworkBehaviour
     void PopulateOtherRacks()
     {
         // TODO: Remake tile prefab and fix references so that we can just have the front
-        // FIXME: Tiles are too big and stretching the otherracks vertically
 
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 13; j++)
-            {
-                Instantiate(TileBackPF, OtherRacksTF.GetChild(i).GetChild(1));
-            }
+            { Instantiate(TileBackPF, OtherRacksTF.GetChild(i).GetChild(1)); }
         }
 
         // one more tile for the dealer if this isn't the server/dealer
         if ((GManager.Offline && GManager.Dealer < 3)
             || GManager.Dealer == GManager.LocalPlayerID)
-        {
-            Instantiate(TileBackPF, OtherRacksTF.GetChild(0).GetChild(1));
-        }
+        { Instantiate(TileBackPF, OtherRacksTF.GetChild(0).GetChild(1)); }
     }
 }
