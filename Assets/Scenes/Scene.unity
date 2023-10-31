@@ -500,7 +500,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 95.81517, y: 0}
   m_SizeDelta: {x: 0, y: 80.7246}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &226827640
@@ -1729,12 +1729,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 947075435}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fdebc879d67549518c3755e90981715, type: 3}
+  m_Script: {fileID: 11500000, guid: 1cbdbbee3da9d4118821bf4877bdeb47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
   Refs: {fileID: 984535264}
-  _TurnPlayerID: 0
 --- !u!1 &948830922
 GameObject:
   m_ObjectHideFlags: 0
@@ -2530,7 +2529,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 156.35863, y: 0}
   m_SizeDelta: {x: 0, y: 80.7246}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1546705243
@@ -3297,7 +3296,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 35.271725, y: 0}
   m_SizeDelta: {x: 0, y: 80.7246}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5526403160183064710
@@ -3530,7 +3529,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6105260093198514519, guid: e53c852bc50fe4d1fad971249e0efd65, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 790.00006
       objectReference: {fileID: 0}
     - target: {fileID: 6105260093198514519, guid: e53c852bc50fe4d1fad971249e0efd65, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3538,7 +3537,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6105260093198514519, guid: e53c852bc50fe4d1fad971249e0efd65, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 400.00003
       objectReference: {fileID: 0}
     - target: {fileID: 6105260093198514519, guid: e53c852bc50fe4d1fad971249e0efd65, type: 3}
       propertyPath: m_AnchoredPosition.y

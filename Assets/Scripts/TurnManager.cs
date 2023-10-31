@@ -51,7 +51,7 @@ public class TurnManager : MonoBehaviour
 
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_ShowTileInDiscard(int tileID)
-    { ShowTileInDiscard(GManager.TileList[tileID].transform.parent); }
+    { ShowTileInDiscard(GameManager.TileList[tileID].transform.parent); }
 
     private void ShowTileInDiscard(Transform tileTF)
     {
@@ -68,7 +68,7 @@ public class TurnManager : MonoBehaviour
         // TODO: add support for calling tiles
 
         // remove the tile from the player's rack list
-        GManager.Racks[TurnPlayerID].Remove(GManager.TileList[tileID]);
+        GManager.Racks[TurnPlayerID].Remove(GameManager.TileList[tileID]);
         // FIXME: getting an error here on the client when discarding
 
         TurnPlayerID = (TurnPlayerID + 1) % 4;  // increment turn
@@ -110,14 +110,14 @@ public class TurnManager : MonoBehaviour
 
     private void ShowNextTile(int tileID)
     {
-        Tile tile = GManager.TileList[tileID].GetComponent<Tile>();
+        Tile tile = GameManager.TileList[tileID].GetComponent<Tile>();
         tile.MoveTile(LocalRackPrivateTF);
     }
 
     private void AITurn(int tileID)
     {
         // for now just discard whatever was picked up
-        Discard(GManager.TileList[tileID].transform.GetChild(0));
+        Discard(GameManager.TileList[tileID].transform.GetChild(0));
     }
 
     private void EnableDiscard()

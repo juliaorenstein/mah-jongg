@@ -87,7 +87,7 @@ public class Setup : NetworkBehaviour
         CreateJokers();
 
         // create reference list for everyone
-        GManager.TileList = tileList.AsReadOnly();
+        GameManager.TileList = tileList.AsReadOnly();
     }
 
     Tile CreateOneTile()
@@ -201,7 +201,7 @@ public class Setup : NetworkBehaviour
         GameObject tile;
         foreach (int tileID in tileArr)
         {
-            tile = GManager.TileList[tileID];
+            tile = GameManager.TileList[tileID];
             LocalTiles.Add(tile);
             tile.transform.GetChild(0)
                 .GetComponent<TileLocomotion>()

@@ -27,13 +27,13 @@ public class CharlestonPassButton : MonoBehaviour
     {
         if (GManager.Offline)
         {
-            Charleston.StartPassFromLocal();
+            Charleston.C_StartPass();
         }
         else
         {
             Button.interactable = false;
             Text.SetText("Waiting for others");
-            Charleston.StartPassFromLocal();
+            Charleston.C_StartPass();
         }
     }
 
@@ -44,7 +44,7 @@ public class CharlestonPassButton : MonoBehaviour
         {
             Button.gameObject.SetActive(false);
             Charleston.gameObject.SetActive(false);
-            Refs.GameManager.GetComponent<TurnManager>().FirstTurn();
+            Refs.GameManager.GetComponent<TurnManagerNetwork>().StartGamePlay();
             return;
         }
 
@@ -58,7 +58,7 @@ public class CharlestonPassButton : MonoBehaviour
         Button.interactable = false;
 
         // set the direction text
-        Text.SetText($"Pass {Charleston.Direction}");
+        Text.SetText($"Pass {Charleston.Direction()}");
     }
 
     

@@ -21,7 +21,7 @@ public class TileLocomotion : MonoBehaviour
     private Transform DraggingTF;
     private Transform CharlestonBoxTF;
     private Transform DiscardTF;
-    private TurnManager TManager;
+    private TurnManagerNetwork TManager;
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class TileLocomotion : MonoBehaviour
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.CharlestonBox.transform;
         DiscardTF = Refs.Discard.transform;
-        TManager = Refs.GameManager.GetComponent<TurnManager>();
+        TManager = Refs.GameManager.GetComponent<TurnManagerNetwork>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -69,13 +69,13 @@ public class TileLocomotion : MonoBehaviour
                       .MoveTile(CharlestonBoxTF.GetChild(2));
             }
 
-            CharlestonBoxTF.GetComponent<Charleston>().CheckDone();
+            CharlestonBoxTF.GetComponent<Charleston>().C_CheckDone();
         }
         else { tileTF.GetComponent<TileLocomotion>().MoveTile(RackPrivateTF); }
     }
 
     private void DoubleClickDiscard(Transform tileTF)
-    { TManager.Discard(tileTF); }
+    { TManager.C_Discard(tileTF); }
 
     public void OnSelect(BaseEventData eventData) { }
 
@@ -114,11 +114,11 @@ public class TileLocomotion : MonoBehaviour
 
         // discard
         else if (raycastTFs.Contains(DiscardTF))
-        { TManager.Discard(transform); }
+        { TManager.C_Discard(transform); }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
-        CharlestonBoxTF.GetComponent<Charleston>().CheckDone();
+        CharlestonBoxTF.GetComponent<Charleston>().C_CheckDone();
         TileImage.raycastTarget = true;     // undo OnBeginDrag things
     }
 
@@ -179,9 +179,9 @@ public class TileLocomotion : MonoBehaviour
     // will handle whether called from the tile or its face!
     public void MoveTile(Transform newParentTF, int newSibIx)
     {
-        Transform tileTF;
-        if (CompareTag("Tile")) { tileTF = transform; }
-        else { tileTF = transform.parent; }
+        Transform tileTF = transform.parent;
+        //if (CompareTag("Tile")) { tileTF = transform; }
+        //else { tileTF = transform.parent; }
 
         tileTF.SetParent(newParentTF);
         if (newParentTF != RackPrivateTF) { tileTF.position = newParentTF.position; }
@@ -198,6 +198,16 @@ public class TileLocomotion : MonoBehaviour
     {
         MoveTile(newParent, newParent.childCount);
     }
+
+    public static void MoveTile(Transform tileTF, Transform destination)
+    {
+        if (tileTF.CompareTag("Tile")) { tileTF = tileTF.GetChild(0); }
+        tileTF.GetComponent<TileLocomotion>().MoveTile(destination);
+    }
+
+    public static void MoveTile(int tileID, Transform destination)
+    { MoveTile(GameManager.TileList[tileID].transform, destination); }
+
 
     /* deprecate?
     private static void SetFaceBackToParent(PointerEventData eventData)
