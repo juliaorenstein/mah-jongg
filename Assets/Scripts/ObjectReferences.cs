@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using Fusion;
 
 public class ObjectReferences : MonoBehaviour
 {
-    public GameObject GameManager;
-    public GameObject TurnManager;
-    public GameObject EventSystem;
-    public GameObject Runner;
+    public GameObject Managers;
+    public GameManager GameManager;
+    public TurnManager TurnManager;
+    public EventSystem EventSystem;
     public GameObject DealMe;
     public GameObject Board;
     public GameObject TilePool;
@@ -15,10 +17,7 @@ public class ObjectReferences : MonoBehaviour
     public GameObject OtherRacks;
     public GameObject StartButtons;
     public GameObject Dragging;
-    public GameObject Charleston;
-    public GameObject CharlestonBox;
-    public GameObject CharlestonPassButton;
-    public GameObject SkipCharlestonButton;
+    public Transform Charleston;
     public GameObject Discard;
     public GameObject TurnIndicator;
 }

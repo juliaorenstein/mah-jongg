@@ -1,33 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Fusion;
+using UnityEngine.EventSystems;
 
-public class DealClient : NetworkBehaviour
-    , IPointerClickHandler
+public class DealClient : MonoBehaviour, IPointerClickHandler
 {
     public ObjectReferences Refs;
-    private Setup Setup;
-    private NetworkRunner NRunner;
-    public PlayerRef Player;
+    private PlayerRef Player;
 
     private void Awake()
     {
-        Setup = Refs.GameManager.GetComponent<Setup>();
-        NRunner = Refs.Runner.GetComponent<NetworkRunner>();
+        Player = Refs.Runner
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        gameObject.SetActive(false);
-        Setup.SetupGame(NRunner, Player);
+        throw new System.NotImplementedException();
     }
-    /*
-    [Rpc]
-    public void RPC_Test()
-    {
-        Debug.Log("RPC");
-    }
-    */
 }

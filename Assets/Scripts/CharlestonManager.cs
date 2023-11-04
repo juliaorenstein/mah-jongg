@@ -12,6 +12,7 @@ public class CharlestonManager : NetworkBehaviour
 
     // everyone
     public ObjectReferences Refs;
+    public Transform CharlestonTF;
     private Button PassButton;
     private GameManager GManager;
     private Transform RackPrivateTF;
@@ -24,6 +25,7 @@ public class CharlestonManager : NetworkBehaviour
 
     private void Awake()
     {
+        CharlestonTF = Refs.Charleston;
         PassButton = Refs.CharlestonPassButton.GetComponent<Button>();
         GManager = Refs.GameManager.GetComponent<GameManager>();
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);

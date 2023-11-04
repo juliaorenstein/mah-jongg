@@ -23,27 +23,26 @@ public class Setup : NetworkBehaviour
     private List<GameObject> tileList;      
     private List<GameObject> LocalTiles;    // Each client has their own rack in this variable
 
-    void Awake()
+    public override void Spawned()
     {   // INITIALIZE FIELDS
+        
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
+        Refs.Managers = gameObject;
         TileID = 0;
         tileList = new();
-        LocalTiles = Refs.EventSystem.GetComponent<TileManager>().LocalTiles;
+        LocalTiles = Refs.Managers.GetComponent<TileManager>().LocalTiles;
         TilePool = Refs.TilePool.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         OtherRacksTF = Refs.OtherRacks.transform;
         TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
-        Refs.Charleston = Resources.Load<GameObject>("Prefabs/Charleston");
     }
+
+
 
     public void SetupGame(NetworkRunner runner, PlayerRef player)
     {
         _runner = runner;
-
-        if (_runner.IsServer && GManager.LocalPlayerID == player)
-        {
-            SpawnEverything();
-        }
 
         GManager.PlayerDict[player.PlayerId] = player;
         GManager.Dealer = 3;                    // make the server the dealer
@@ -86,25 +85,6 @@ public class Setup : NetworkBehaviour
         PopulateLocalRack(tileArr);             // populate 'em
         HideButtons();                          // hide start buttons
         PopulateOtherRacks();                   // show the other player's racks
-    }
-
-    private void SpawnEverything()
-    {
-        // game manager
-        Refs.GameManager = _runner.Spawn(
-            Resources.Load<GameObject>("Prefabs/GameManager")
-            ).gameObject;
-        GManager = Refs.GameManager.GetComponent<GameManager>();
-
-        // charleston
-        Refs.Charleston = _runner.Spawn(
-            Resources.Load<GameObject>("Prefabs/Charleston")
-            ).gameObject;
-
-        // turn manager
-        Refs.TurnManager = _runner.Spawn(
-            Resources.Load<GameObject>("Prefabs/TurnManager")
-            ).gameObject;
     }
 
     public void CreateTiles()

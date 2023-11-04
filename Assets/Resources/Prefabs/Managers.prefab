@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1758063960921082690}
   - component: {fileID: 1758063960921082693}
+  - component: {fileID: 2895622059701712915}
   - component: {fileID: 1758063960921082694}
   - component: {fileID: 1758063960921082688}
   - component: {fileID: 1758063960921082689}
@@ -58,9 +59,25 @@ MonoBehaviour:
     RawGuidValue: 0f9688b8a27b547f39494a77ac77ff06
   NestedObjects: []
   NetworkedBehaviours:
+  - {fileID: 2895622059701712915}
   - {fileID: 1758063960921082689}
   - {fileID: 1758063960921082695}
   SimulationBehaviours: []
+--- !u!114 &2895622059701712915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758063960921082692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773717b5fba61433486af0e128e467f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interpolationDataSource: 0
+  Refs: {fileID: 0}
+  TileID: 0
 --- !u!114 &1758063960921082694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,6 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 690fa94a6de0946fd85d15c865156a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Refs: {fileID: 0}
   Offline: 0
   LocalPlayerID: 0
   Dealer: 0
@@ -103,6 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
   Refs: {fileID: 0}
+  CharlestonTF: {fileID: 0}
 --- !u!114 &1758063960921082695
 MonoBehaviour:
   m_ObjectHideFlags: 0

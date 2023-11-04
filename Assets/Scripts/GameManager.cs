@@ -5,6 +5,7 @@ using Fusion;
 
 public class GameManager : MonoBehaviour
 {
+    public ObjectReferences Refs;
     public bool Offline = false;
     public int LocalPlayerID;
     public int Dealer;

@@ -11,31 +11,37 @@ public class CharlestonPassButton : MonoBehaviour
 {
     public ObjectReferences Refs;
     private GameManager GManager;
-    private Charleston Charleston;
+    private CharlestonManager CManager;
     private Button Button;
     private GameObject SkipButtonGO;
     private TextMeshProUGUI Text;
 
     private void Awake()
     {
-        GManager = Refs.GameManager.GetComponent<GameManager>();
-        Charleston = Refs.CharlestonBox.GetComponent<Charleston>();
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
+        // FIXME: don't call find
         Button = GetComponent<Button>();
-        SkipButtonGO = Refs.SkipCharlestonButton;
+        SkipButtonGO = transform.parent.GetChild(2).gameObject;
         Text = GetComponentInChildren<TextMeshProUGUI>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (!GManager)
+        {   // initialize these variables
+            GManager = Refs.Managers.GetComponent<GameManager>();
+            CManager = Refs.Managers.GetComponent<CharlestonManager>();
+        }
+
         if (GManager.Offline)
         {
-            Charleston.C_StartPass();
+            CManager.C_StartPass();
         }
         else
         {
             Button.interactable = false;
             Text.SetText("Waiting for others");
-            Charleston.C_StartPass();
+            CManager.C_StartPass();
         }
     }
 
@@ -46,9 +52,9 @@ public class CharlestonPassButton : MonoBehaviour
         if (counter == -1 || counter == 7)
         {
             Button.gameObject.SetActive(false);
-            Charleston.gameObject.SetActive(false);
+            CManager.gameObject.SetActive(false);
             SkipButtonGO.SetActive(false);
-            Refs.GameManager.GetComponent<TurnManager>().StartGamePlay();
+            Refs.Managers.GetComponent<TurnManager>().StartGamePlay();
             return;
         }
 
@@ -65,7 +71,7 @@ public class CharlestonPassButton : MonoBehaviour
         Button.interactable = false;
 
         // set the direction text
-        Text.SetText($"Pass {Charleston.Direction()}");
+        Text.SetText($"Pass {CManager.Direction()}");
     }
 
 

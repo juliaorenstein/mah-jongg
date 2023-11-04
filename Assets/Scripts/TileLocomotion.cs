@@ -33,7 +33,7 @@ public class TileLocomotion : MonoBehaviour
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         TileImage = GetComponent<Image>();
         DraggingTF = Refs.Dragging.transform;
-        CharlestonBoxTF = Refs.CharlestonBox.transform;
+        CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
         TManager = Refs.GameManager.GetComponent<TurnManager>();
     }
@@ -74,7 +74,7 @@ public class TileLocomotion : MonoBehaviour
                       .MoveTile(CharlestonBoxTF.GetChild(2));
             }
 
-            CharlestonBoxTF.GetComponent<Charleston>().C_CheckDone();
+            CharlestonBoxTF.GetComponent<CharlestonManager>().C_CheckDone();
         }
         else { tileTF.GetComponent<TileLocomotion>().MoveTile(RackPrivateTF); }
     }
@@ -125,7 +125,7 @@ public class TileLocomotion : MonoBehaviour
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
-        CharlestonBoxTF.GetComponent<Charleston>().C_CheckDone();
+        CharlestonBoxTF.GetComponent<CharlestonManager>().C_CheckDone();
         TileImage.raycastTarget = true;     // undo OnBeginDrag things
     }
 

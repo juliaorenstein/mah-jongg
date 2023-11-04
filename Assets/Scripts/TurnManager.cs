@@ -29,7 +29,8 @@ public class TurnManager : NetworkBehaviour
     public override void Spawned()
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
-        GManager = Refs.GameManager.GetComponent<GameManager>();
+        // FIXME: Find call
+        GManager = GetComponent<GameManager>();
         DiscardTF = Refs.Discard.transform;
         LocalRackTF = Refs.LocalRack.transform;
         RackLists = GManager.Racks;
