@@ -5,6 +5,7 @@ using UnityEngine;
 public class ObjectReferences : MonoBehaviour
 {
     public GameObject GameManager;
+    public GameObject TurnManager;
     public GameObject EventSystem;
     public GameObject Runner;
     public GameObject DealMe;
@@ -14,7 +15,10 @@ public class ObjectReferences : MonoBehaviour
     public GameObject OtherRacks;
     public GameObject StartButtons;
     public GameObject Dragging;
+    public GameObject Charleston;
     public GameObject CharlestonBox;
     public GameObject CharlestonPassButton;
+    public GameObject SkipCharlestonButton;
     public GameObject Discard;
+    public GameObject TurnIndicator;
 }

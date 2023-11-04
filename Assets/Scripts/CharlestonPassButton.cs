@@ -13,6 +13,7 @@ public class CharlestonPassButton : MonoBehaviour
     private GameManager GManager;
     private Charleston Charleston;
     private Button Button;
+    private GameObject SkipButtonGO;
     private TextMeshProUGUI Text;
 
     private void Awake()
@@ -20,6 +21,7 @@ public class CharlestonPassButton : MonoBehaviour
         GManager = Refs.GameManager.GetComponent<GameManager>();
         Charleston = Refs.CharlestonBox.GetComponent<Charleston>();
         Button = GetComponent<Button>();
+        SkipButtonGO = Refs.SkipCharlestonButton;
         Text = GetComponentInChildren<TextMeshProUGUI>();
     }
 
@@ -39,14 +41,19 @@ public class CharlestonPassButton : MonoBehaviour
 
     public void UpdateButton(int counter)
     {
-        // if Counter is -1, remove the button and start main gameplay
-        if (counter == -1)
+        // if Counter is -1 or 7, remove the button and start main gameplay
+
+        if (counter == -1 || counter == 7)
         {
             Button.gameObject.SetActive(false);
             Charleston.gameObject.SetActive(false);
-            Refs.GameManager.GetComponent<TurnManagerNetwork>().StartGamePlay();
+            SkipButtonGO.SetActive(false);
+            Refs.GameManager.GetComponent<TurnManager>().StartGamePlay();
             return;
         }
+
+        // TODO: blind and optional passes
+        // TODO: press space to pass
 
         // if it's a blind pass, allow pass whenever.
         // otherwise, make button not interactable.
@@ -61,5 +68,5 @@ public class CharlestonPassButton : MonoBehaviour
         Text.SetText($"Pass {Charleston.Direction()}");
     }
 
-    
+
 }

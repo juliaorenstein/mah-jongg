@@ -14,11 +14,12 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner runner;
     private Setup Setup;
     private GameObject DealMe;
+    private GameObject GManager;
 
     private void Awake()
     {   // INITIALIZE GAME OBJECT FIELDS
-        Setup = Refs.GameManager.GetComponent<Setup>();
         DealMe = Refs.DealMe;
+        GManager = Resources.Load<GameObject>("Prefabs/GameManager");
     }
 
     public async void StartGame(GameMode mode)
@@ -63,10 +64,18 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         // LOGGED ON CLIENT WHEN CLIENT JOINS
         
         Debug.Log("OnPlayerJoined");
-        if (player == runner.LocalPlayer) { Setup.SetupGame(runner, player); }
-        else if (runner.IsServer )
+        if (runner.IsServer)
         {
+            runner.Spawn(Resources.Load<GameObject>("Prefabs/Managers"));
+        }
 
+        if (player == runner.LocalPlayer)
+        {
+            runner.Spawn(GManager);
+            GManager.GetComponent<Setup>().SetupGame(runner, player);
+        }
+        else if (runner.IsServer)
+        {
             DealMe.GetComponent<DealClient>().Player = player;
             DealMe.SetActive(true);
         }

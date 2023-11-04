@@ -14,6 +14,7 @@ public class TileLocomotion : MonoBehaviour
     , IEndDragHandler
 {
     private ObjectReferences Refs;
+    private GameManager GManager;
     private EventSystem ESystem;
     public Transform TileTF;
     private Transform RackPrivateTF;
@@ -21,11 +22,12 @@ public class TileLocomotion : MonoBehaviour
     private Transform DraggingTF;
     private Transform CharlestonBoxTF;
     private Transform DiscardTF;
-    private TurnManagerNetwork TManager;
+    private TurnManager TManager;
 
     private void Awake()
     {
         Refs = GetComponentInParent<Tile>().Refs;
+        GManager = Refs.GameManager.GetComponent<GameManager>();
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();
         TileTF = transform.parent;
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
@@ -33,7 +35,7 @@ public class TileLocomotion : MonoBehaviour
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.CharlestonBox.transform;
         DiscardTF = Refs.Discard.transform;
-        TManager = Refs.GameManager.GetComponent<TurnManagerNetwork>();
+        TManager = Refs.GameManager.GetComponent<TurnManager>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -43,7 +45,10 @@ public class TileLocomotion : MonoBehaviour
         {
             if (CharlestonBoxTF.gameObject.activeSelf)
             { DoubleClickCharleston(tileTF); }
-            else { DoubleClickDiscard(tileTF); }
+            else if (TManager.TurnPlayerID == GManager.LocalPlayerID)
+            { DoubleClickDiscard(tileTF); }
+            // FIXME: this check is failing because TurnPlayerID doesn't get
+            // set until the first turn is happening.
         }
     }
 
@@ -75,7 +80,9 @@ public class TileLocomotion : MonoBehaviour
     }
 
     private void DoubleClickDiscard(Transform tileTF)
-    { TManager.C_Discard(tileTF); }
+    {
+        TManager.C_Discard(tileTF.parent);
+    }
 
     public void OnSelect(BaseEventData eventData) { }
 
@@ -88,11 +95,11 @@ public class TileLocomotion : MonoBehaviour
     }
 
     public void OnDrag(PointerEventData eventData)
-    {   
+    {
         // update position to match mouse
         transform.position += (Vector3)eventData.delta;
     }
-    
+
     public void OnEndDrag(PointerEventData eventData)
     {
         transform.SetParent(TileTF);        // undo OnBeginDrag things
@@ -103,18 +110,18 @@ public class TileLocomotion : MonoBehaviour
         IEnumerable<Transform> raycastTFs
             = raycastResults.Select(res => res.gameObject.transform);
         float dropXPos = eventData.pointerDrag.transform.position.x;
-        
+
         // drop on rack
         if (raycastTFs.Contains(RackPrivateTF)) { DropOnRack(dropXPos); }
 
         // drop on charleston
         else if (raycastTFs.Contains(CharlestonBoxTF)
             && eventData.pointerCurrentRaycast.gameObject != CharlestonBoxTF.gameObject)
-            { DropOnCharleston(eventData); }
+        { DropOnCharleston(eventData); }
 
         // discard
         else if (raycastTFs.Contains(DiscardTF))
-        { TManager.C_Discard(transform); }
+        { TManager.C_Discard(transform.parent); }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
@@ -168,7 +175,7 @@ public class TileLocomotion : MonoBehaviour
         else { charlestonSpotTF = raycastTF; }
         MoveTile(charlestonSpotTF);
 
-        
+
     }
 
     void MoveBack()

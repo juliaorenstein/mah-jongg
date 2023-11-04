@@ -13,7 +13,6 @@ public class Setup : NetworkBehaviour
     private Transform TilePool;
     private Transform OtherRacksTF;
     private Transform LocalRackPrivateTF;
-    //private TurnManager TManager;
 
     // PREFABS
     private GameObject TilePF;
@@ -28,26 +27,32 @@ public class Setup : NetworkBehaviour
     {   // INITIALIZE FIELDS
         TileID = 0;
         tileList = new();
-        GManager = Refs.GameManager.GetComponent<GameManager>();
         LocalTiles = Refs.EventSystem.GetComponent<TileManager>().LocalTiles;
         TilePool = Refs.TilePool.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         OtherRacksTF = Refs.OtherRacks.transform;
         TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
-        //TManager = GManager.GetComponent<TurnManager>();
+        Refs.Charleston = Resources.Load<GameObject>("Prefabs/Charleston");
     }
 
     public void SetupGame(NetworkRunner runner, PlayerRef player)
     {
         _runner = runner;
+
+        if (_runner.IsServer && GManager.LocalPlayerID == player)
+        {
+            SpawnEverything();
+        }
+
         GManager.PlayerDict[player.PlayerId] = player;
         GManager.Dealer = 3;                    // make the server the dealer
         GManager.LocalPlayerID = runner.LocalPlayer.PlayerId; // set player ID
-                                                              //if (GManager.Dealer == GManager.LocalPlayerID)
-                                                              // everyone creates the tiles
+
+                                                          
         if (_runner.LocalPlayer == player)
         {
+            Refs.Charleston.transform.SetParent(Refs.Board.transform);
             CreateTiles();
             HideButtons();                      // hide start buttons
             PopulateOtherRacks();               // show the other player's racks
@@ -61,7 +66,6 @@ public class Setup : NetworkBehaviour
 
         if (_runner.IsServer)  
         {                                       // server deals to clients
-            
             int[] tileArr = PrepRackForClient(player.PlayerId);
             RPC_SendRackToPlayer(player, tileArr);
         }
@@ -69,8 +73,12 @@ public class Setup : NetworkBehaviour
 
     public void SetupOfflineGame()
     {
-        GManager.Dealer = 0;                    // set dealer
+
+        GManager.PlayerDict[3] = 3;             // set the player so it doesn't register as AI
         GManager.Offline = true;                // this check will be handy
+        GManager.Dealer = 0;                    // set dealer
+        GManager.LocalPlayerID = 3;             // local player is 3, just like host
+
         CreateTiles();                          // create tiles
         Shuffle();                              // shuffle
         Deal();                                 // deal
@@ -78,6 +86,25 @@ public class Setup : NetworkBehaviour
         PopulateLocalRack(tileArr);             // populate 'em
         HideButtons();                          // hide start buttons
         PopulateOtherRacks();                   // show the other player's racks
+    }
+
+    private void SpawnEverything()
+    {
+        // game manager
+        Refs.GameManager = _runner.Spawn(
+            Resources.Load<GameObject>("Prefabs/GameManager")
+            ).gameObject;
+        GManager = Refs.GameManager.GetComponent<GameManager>();
+
+        // charleston
+        Refs.Charleston = _runner.Spawn(
+            Resources.Load<GameObject>("Prefabs/Charleston")
+            ).gameObject;
+
+        // turn manager
+        Refs.TurnManager = _runner.Spawn(
+            Resources.Load<GameObject>("Prefabs/TurnManager")
+            ).gameObject;
     }
 
     public void CreateTiles()
@@ -176,7 +203,7 @@ public class Setup : NetworkBehaviour
         }
 
         // DEAL ONE MORE TILE TO THE DEALER
-        GManager.Racks[3].Add(GManager.Wall.Pop());
+        GManager.Racks[GManager.Dealer].Add(GManager.Wall.Pop());
     }
 
     // PREPARE A LIST OF TILE IDS TO SEND TO CLIENT FOR RPC_SendRackToPlayer

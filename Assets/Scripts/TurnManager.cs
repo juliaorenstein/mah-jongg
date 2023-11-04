@@ -3,131 +3,142 @@ using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 using UnityEngine.UI;
+using TMPro;
 using System.Linq;
 
-public class TurnManager : MonoBehaviour
+public class TurnManager : NetworkBehaviour
+    ,ISpawned
+    ,IAfterSpawned
 {
+    // everyone (local)
     public ObjectReferences Refs;
     private GameManager GManager;
-    private int TurnPlayerID;
     private Transform DiscardTF;
-    private Transform LocalRackPrivateTF;
+    private Transform LocalRackTF;
+    private TextMeshProUGUI TurnIndicatorText;
 
-    private void Start()
+    // just for host
+    private List<List<GameObject>> RackLists;
+
+    [Networked]
+    public int TurnPlayerID { get; set; }
+
+    // FIXME: with 4 sessions open, discarding is synced :) But all players get
+    // the new tile and host is behind one turn on the display
+
+    public override void Spawned()
     {
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
         GManager = Refs.GameManager.GetComponent<GameManager>();
         DiscardTF = Refs.Discard.transform;
-        LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
+        LocalRackTF = Refs.LocalRack.transform;
+        RackLists = GManager.Racks;
+        TurnIndicatorText = Refs.TurnIndicator
+                                .transform
+                                .GetChild(0)
+                                .GetComponent<TextMeshProUGUI>();
+    }
+
+    public void AfterSpawned()
+    {
         TurnPlayerID = GManager.Dealer;
     }
 
+    // Setup first turn
     public void StartGamePlay()
     {
         DiscardTF.gameObject.SetActive(true);
-        if (IsMyTurn()) { EnableDiscard(); }
-    }
-
-    public void Discard(Transform tileTF)
-    {
-        // FIXME: Create an overload that takes tileID
-
-        // Move the tile to the Discard area
-        int tileID = tileTF.parent.GetComponent<Tile>().ID;
-
-        if (GManager.Offline)
+        UpdateTurnIndicator();
+        if (GManager.LocalPlayerID == GManager.Dealer)
         {
-            ShowTileInDiscard(tileTF);
-            NextTurnHost(tileTF.parent.GetComponent<Tile>().ID);
-        }
-
-        else
-        {
-            RPC_ShowTileInDiscard(tileID);
-            RPC_NextTurnHost(tileID);
-            // FIXME: discard isn't showing on other machines during networked
-            // FIXME: need to turn raycast off on discarded tiles
+            DiscardTF.GetComponent<Image>().raycastTarget = true;
         }
     }
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_ShowTileInDiscard(int tileID)
-    { ShowTileInDiscard(GameManager.TileList[tileID].transform.parent); }
-
-    private void ShowTileInDiscard(Transform tileTF)
+    // Client discards a tile
+    public void C_Discard(Transform discardTileTF)
     {
-        tileTF.GetComponentInChildren<TileLocomotion>().MoveTile(DiscardTF);
-        tileTF.GetComponentInChildren<Image>().raycastTarget = false;
+        RPC_C2H_Discard(discardTileTF.GetComponent<Tile>().ID);
+        DiscardTF.GetComponent<Image>().raycastTarget = false;
     }
 
-    [Rpc (RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_NextTurnHost(int tileID)
-    { NextTurnHost(tileID); }
-
-    private void NextTurnHost(int tileID)
+    // RPC discard client to server
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority, HostMode = RpcHostMode.SourceIsHostPlayer)]
+    void RPC_C2H_Discard(int discardTileID, RpcInfo info = default)
     {
-        // TODO: add support for calling tiles
+        int discardPlayerID = info.Source.PlayerId;
+        H_NextTurn(discardTileID, discardPlayerID);
+    }
 
-        // remove the tile from the player's rack list
-        GManager.Racks[TurnPlayerID].Remove(GameManager.TileList[tileID]);
-        // FIXME: getting an error here on the client when discarding
+    // Server does next turn logic
+    void H_NextTurn(int discardTileID, int discardPlayerID)
+    {
+        // update lists
+        RackLists[discardPlayerID].Remove(GameManager.TileList[discardTileID]);
 
-        TurnPlayerID = (TurnPlayerID + 1) % 4;  // increment turn
+        // increment turn player
+        UpdateTurnPlayerID();
+        RPC_H2A_ShowDiscard(discardTileID);
+
+        // TODO: wait for call
+
+        PlayerRef nextPlayer = GManager.PlayerDict[TurnPlayerID];   // set next player
+        GameObject nextTile = GManager.Wall.Pop();                  // set next tile from wall
+        GManager.Racks[TurnPlayerID].Add(nextTile);                 // add that tile to the player's rack list
+        int nextTileID = GameManager.TileList.IndexOf(nextTile);    // find the ID of that til
+        if (nextPlayer == PlayerRef.None) { H_AITurn(nextTileID); }   // if it's AI, do that turn
+        RPC_H2C_NextTurn(nextPlayer, nextTileID);         // if it's a person, hand it over to that client
         
-        // grab the next tile on the wall to show to the next player
-        int nextTileID = GManager.Wall.Pop().GetComponent<Tile>().ID;
+    }
+    // FIXME: with >1 player, the discard is showing up fine for clients but showing up in the rack
+    // for the host
 
-        // initiate turn on local machine or simulate AI turn
-        if (GManager.Offline)   
-        {
-            if (IsMyTurn()) { NextTurnClient(nextTileID); }
-            else { AITurn(nextTileID); }
-        }
-        else
-        {
-            PlayerRef turnPlayer = GManager.PlayerDict[TurnPlayerID];
-            RPC_DisableDiscard();
-            if (turnPlayer == PlayerRef.None) { AITurn(nextTileID); }
-            else { RPC_NextTurnClient(turnPlayer, nextTileID); }
-        }
+    // RPC discard server to all
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    void RPC_H2A_ShowDiscard(int discardTileID)
+    { C_ShowDiscard(discardTileID); }
 
-        //FIXME: discard is showing 3 tiles sometimes when playing single player
-        // on network, and the tiles sometimes rearrange??
+    // All clients show discarded tile
+    void C_ShowDiscard(int discardTileID)
+    {
+        MoveTile(discardTileID, DiscardTF);
+        UpdateTurnIndicator();
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_NextTurnClient([RpcTarget] PlayerRef _, int tileID)
-    { NextTurnClient(tileID); }
+    // RPC sends next tile to client
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    void RPC_H2C_NextTurn([RpcTarget] PlayerRef _, int nextTileID)
+    { C_NextTurn(nextTileID); }
 
-    private void NextTurnClient(int tileID)
+    // Client starts turn
+    void C_NextTurn(int nextTileID)
     {
-        EnableDiscard();
-        ShowNextTile(tileID);
-    }    
-
-    [Rpc (RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_ShowNextTile([RpcTarget] PlayerRef _, int nextTileID)
-    { ShowNextTile(nextTileID); }
-
-    private void ShowNextTile(int tileID)
-    {
-        Tile tile = GameManager.TileList[tileID].GetComponent<Tile>();
-        tile.MoveTile(LocalRackPrivateTF);
+        MoveTile(nextTileID, LocalRackTF.GetChild(1));  // display tile
+        DiscardTF.GetComponent<Image>().raycastTarget = true; // enable discard
     }
 
-    private void AITurn(int tileID)
+    void H_AITurn(int newTileID)
     {
-        // for now just discard whatever was picked up
-        Discard(GameManager.TileList[tileID].transform.GetChild(0));
+        int discardTileID = newTileID; // for now just discard what was picked up
+        H_NextTurn(discardTileID, TurnPlayerID);
     }
 
-    private void EnableDiscard()
-    { DiscardTF.GetComponent<Image>().raycastTarget = true; }
+    // Helper function to move tiles
+    void MoveTile(int tileID, Transform destination)
+    {
+        GameManager.TileList[tileID].transform
+                        .GetChild(0)
+                        .GetComponent<TileLocomotion>()
+                        .MoveTile(destination);
+    }
 
-    [Rpc (RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_DisableDiscard() { DisableDiscard(); }
+    void UpdateTurnPlayerID()
+    {
+        TurnPlayerID = (TurnPlayerID + 1) % 4;
+    }
 
-    private void DisableDiscard()
-    { DiscardTF.GetComponent<Image>().raycastTarget = false; }
-
-    private bool IsMyTurn() { return TurnPlayerID == GManager.LocalPlayerID; }
+    void UpdateTurnIndicator()
+    {
+        TurnIndicatorText.SetText($"It's player {TurnPlayerID}'s turn.");
+    }
 }
