@@ -711,7 +711,7 @@ public class FusionGraph : FusionGraphBase {
     ResetGraphShader();
 
     var fontColor = _fusionStats.FontColor;
-    var fontColorDim = _fusionStats.FontColor * new Color(1, 1, 1, 0.5f);
+    var fontColorDim = _fusionStats.FontColor * new UnityEngine.Color(1, 1, 1, 0.5f);
 
     var titleRT = root.CreateRectTransform("Title")
       .ExpandAnchor()

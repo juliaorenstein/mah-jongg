@@ -21,9 +21,9 @@ public static class FusionScalableIMGUI
       _scalableSkin.button.normal.background = _scalableSkin.box.normal.background;
       _scalableSkin.button.hover.background = _scalableSkin.window.normal.background;
 
-      _scalableSkin.button.normal.textColor = new Color(.8f, .8f, .8f);
-      _scalableSkin.button.hover.textColor = new Color(1f, 1f, 1f);
-      _scalableSkin.button.active.textColor = new Color(1f, 1f, 1f);
+            _scalableSkin.button.normal.textColor = new UnityEngine.Color(.8f, .8f, .8f);
+            _scalableSkin.button.hover.textColor = new UnityEngine.Color(1f, 1f, 1f);
+            _scalableSkin.button.active.textColor = new UnityEngine.Color(1f, 1f, 1f);
       _scalableSkin.button.border = new RectOffset(6, 6, 6, 6);
       _scalableSkin.window.border = new RectOffset(8, 8, 8, 10);
     } else {

@@ -8,8 +8,20 @@ using UnityEngine.EventSystems;
 
 public class StartOfflineButton : MonoBehaviour, IPointerClickHandler
 {
+    private Spawner spawner;
+
+    private void Awake()
+    {
+        spawner = GameObject.Find("NetworkRunner").GetComponent<Spawner>();
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameObject.Find("GameManager").GetComponent<Setup>().SetupOfflineGame();
+        //GameObject Managers = Instantiate(Resources.Load<GameObject>("Prefabs/Managers"));
+        //Managers.GetComponent<Setup>().O_Setup();
+
+        spawner.StartGame(GameMode.Single);
+        GetComponent<Button>().interactable = false;
+        GetComponentInChildren<TextMeshProUGUI>().SetText("Connecting...");
     }
 }

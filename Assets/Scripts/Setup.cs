@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Fusion;
 using UnityEngine;
+using UnityEngine.UI;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 
 public class Setup : NetworkBehaviour
@@ -9,11 +13,10 @@ public class Setup : NetworkBehaviour
     // GAME OBJECTS
     public ObjectReferences Refs;
     private GameManager GManager;
-    private NetworkRunner _runner;
     private Transform TilePool;
     private Transform OtherRacksTF;
     private Transform LocalRackPrivateTF;
-    //private TurnManager TManager;
+    private CharlestonPassButton PassButtonScript;
 
     // PREFABS
     private GameObject TilePF;
@@ -24,60 +27,48 @@ public class Setup : NetworkBehaviour
     private List<GameObject> tileList;      
     private List<GameObject> LocalTiles;    // Each client has their own rack in this variable
 
-    void Awake()
-    {   // INITIALIZE FIELDS
+    public override void Spawned()
+    {           
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
+        Refs.Managers = gameObject;
+        PassButtonScript = Refs.Charleston.GetComponentInChildren<CharlestonPassButton>();
+        GManager = GetComponent<GameManager>();
+        PassButtonScript.GManager = GManager;
+        PassButtonScript.CManager = Refs.Managers.GetComponent<CharlestonManager>();
         TileID = 0;
         tileList = new();
-        GManager = Refs.GameManager.GetComponent<GameManager>();
-        LocalTiles = Refs.EventSystem.GetComponent<TileManager>().LocalTiles;
+        LocalTiles = Refs.Managers.GetComponent<TileManager>().LocalTiles;
         TilePool = Refs.TilePool.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         OtherRacksTF = Refs.OtherRacks.transform;
         TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
-        //TManager = GManager.GetComponent<TurnManager>();
+        C_Setup();
     }
 
-    public void SetupGame(NetworkRunner runner, PlayerRef player)
+    public void C_Setup()
     {
-        _runner = runner;
-        GManager.PlayerDict[player.PlayerId] = player;
-        GManager.Dealer = 3;                    // make the server the dealer
-        GManager.LocalPlayerID = runner.LocalPlayer.PlayerId; // set player ID
-                                                              //if (GManager.Dealer == GManager.LocalPlayerID)
-                                                              // everyone creates the tiles
-        if (_runner.LocalPlayer == player)
-        {
-            CreateTiles();
-            HideButtons();                      // hide start buttons
-            PopulateOtherRacks();               // show the other player's racks
-        }
-
-        if (_runner.IsServer && GManager.LocalPlayerID == player)
+        GManager.LocalPlayerID = Runner.LocalPlayer.PlayerId; // set player ID
+        GManager.DealerID = 3;                    // make the server the dealer
+        
+        Refs.Charleston.transform.SetParent(Refs.Board.transform);
+        CreateTiles();
+        //WriteTilesToFile();
+        HideButtons();                      // hide start buttons
+        PopulateOtherRacks();               // show the other player's racks
+        
+        if (Runner.IsServer)
         {
             Shuffle();
             Deal();
         }
-
-        if (_runner.IsServer)  
-        {                                       // server deals to clients
-            
-            int[] tileArr = PrepRackForClient(player.PlayerId);
-            RPC_SendRackToPlayer(player, tileArr);
-        }
     }
 
-    public void SetupOfflineGame()
+    public void H_Setup(PlayerRef player)
     {
-        GManager.Dealer = 0;                    // set dealer
-        GManager.Offline = true;                // this check will be handy
-        CreateTiles();                          // create tiles
-        Shuffle();                              // shuffle
-        Deal();                                 // deal
-        int[] tileArr = PrepRackForClient(3);   // get tiles on rack
-        PopulateLocalRack(tileArr);             // populate 'em
-        HideButtons();                          // hide start buttons
-        PopulateOtherRacks();                   // show the other player's racks
+        GManager.PlayerDict[player.PlayerId] = player;
+        int[] tileArr = PrepRackForClient(player.PlayerId);
+        RPC_SendRackToPlayer(player, tileArr);
     }
 
     public void CreateTiles()
@@ -87,7 +78,34 @@ public class Setup : NetworkBehaviour
         CreateJokers();
 
         // create reference list for everyone
-        GManager.TileList = tileList.AsReadOnly();
+        GameManager.TileList = tileList.AsReadOnly();
+    }
+
+    // for debugging
+    void WriteTilesToFile()
+    {
+        string filePath = "/Users/juliaorenstein/Unity/Maj/Tiles.txt";
+
+        try
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (GameObject tileGO in GameManager.TileList)
+                {
+                    Tile tile = tileGO.GetComponent<Tile>();
+                    string line = $"{tile.ID},{tile.name}";
+                    // Write to the file
+                    writer.WriteLine(line);
+                }
+                
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("An error occurred: " + e.Message);
+        }
+
+        
     }
 
     Tile CreateOneTile()
@@ -176,7 +194,7 @@ public class Setup : NetworkBehaviour
         }
 
         // DEAL ONE MORE TILE TO THE DEALER
-        GManager.Racks[3].Add(GManager.Wall.Pop());
+        GManager.Racks[GManager.DealerID].Add(GManager.Wall.Pop());
     }
 
     // PREPARE A LIST OF TILE IDS TO SEND TO CLIENT FOR RPC_SendRackToPlayer
@@ -201,11 +219,10 @@ public class Setup : NetworkBehaviour
         GameObject tile;
         foreach (int tileID in tileArr)
         {
-            tile = GManager.TileList[tileID];
+            tile = GameManager.TileList[tileID];
             LocalTiles.Add(tile);
-            tile.transform.GetChild(0)
-                .GetComponent<TileLocomotion>()
-                .MoveTile(LocalRackPrivateTF);        } 
+            TileLocomotion.MoveTile(tile.transform, LocalRackPrivateTF);
+        }
     }
 
     void HideButtons()
@@ -215,8 +232,6 @@ public class Setup : NetworkBehaviour
 
     void PopulateOtherRacks()
     {
-        // TODO: Remake tile prefab and fix references so that we can just have the front
-
         for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 13; j++)
@@ -224,8 +239,7 @@ public class Setup : NetworkBehaviour
         }
 
         // one more tile for the dealer if this isn't the server/dealer
-        if ((GManager.Offline && GManager.Dealer < 3)
-            || GManager.Dealer == GManager.LocalPlayerID)
+        if (GManager.DealerID != GManager.LocalPlayerID)
         { Instantiate(TileBackPF, OtherRacksTF.GetChild(0).GetChild(1)); }
     }
 }

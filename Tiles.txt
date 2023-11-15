@@ -1,0 +1,152 @@
+0,Green
+1,Green
+2,Green
+3,Green
+4,1 bam
+5,1 bam
+6,1 bam
+7,1 bam
+8,2 bam
+9,2 bam
+10,2 bam
+11,2 bam
+12,3 bam
+13,3 bam
+14,3 bam
+15,3 bam
+16,4 bam
+17,4 bam
+18,4 bam
+19,4 bam
+20,5 bam
+21,5 bam
+22,5 bam
+23,5 bam
+24,6 bam
+25,6 bam
+26,6 bam
+27,6 bam
+28,7 bam
+29,7 bam
+30,7 bam
+31,7 bam
+32,8 bam
+33,8 bam
+34,8 bam
+35,8 bam
+36,9 bam
+37,9 bam
+38,9 bam
+39,9 bam
+40,Red
+41,Red
+42,Red
+43,Red
+44,1 crak
+45,1 crak
+46,1 crak
+47,1 crak
+48,2 crak
+49,2 crak
+50,2 crak
+51,2 crak
+52,3 crak
+53,3 crak
+54,3 crak
+55,3 crak
+56,4 crak
+57,4 crak
+58,4 crak
+59,4 crak
+60,5 crak
+61,5 crak
+62,5 crak
+63,5 crak
+64,6 crak
+65,6 crak
+66,6 crak
+67,6 crak
+68,7 crak
+69,7 crak
+70,7 crak
+71,7 crak
+72,8 crak
+73,8 crak
+74,8 crak
+75,8 crak
+76,9 crak
+77,9 crak
+78,9 crak
+79,9 crak
+80,Soap
+81,Soap
+82,Soap
+83,Soap
+84,1 dot
+85,1 dot
+86,1 dot
+87,1 dot
+88,2 dot
+89,2 dot
+90,2 dot
+91,2 dot
+92,3 dot
+93,3 dot
+94,3 dot
+95,3 dot
+96,4 dot
+97,4 dot
+98,4 dot
+99,4 dot
+100,5 dot
+101,5 dot
+102,5 dot
+103,5 dot
+104,6 dot
+105,6 dot
+106,6 dot
+107,6 dot
+108,7 dot
+109,7 dot
+110,7 dot
+111,7 dot
+112,8 dot
+113,8 dot
+114,8 dot
+115,8 dot
+116,9 dot
+117,9 dot
+118,9 dot
+119,9 dot
+120,North
+121,North
+122,North
+123,North
+124,South
+125,South
+126,South
+127,South
+128,East
+129,East
+130,East
+131,East
+132,West
+133,West
+134,West
+135,West
+136,Flower
+137,Flower
+138,Flower
+139,Flower
+140,Flower
+141,Flower
+142,Flower
+143,Flower
+144,Joker
+145,Joker
+146,Joker
+147,Joker
+148,Joker
+149,Joker
+150,Joker
+151,Joker

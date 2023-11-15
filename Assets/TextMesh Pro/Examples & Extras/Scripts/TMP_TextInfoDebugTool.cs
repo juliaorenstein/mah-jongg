@@ -197,7 +197,7 @@ namespace TMPro.Examples
                if (m_HandleSize < 0.5f)
                {
                    GUIStyle style = new GUIStyle(GUI.skin.GetStyle("Label"));
-                   style.normal.textColor = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+                   style.normal.textColor = new UnityEngine.Color(0.6f, 0.6f, 0.6f, 1.0f);
                    style.fontSize = 12;
                    style.fixedWidth = 200;
                    style.fixedHeight = 20;
@@ -521,7 +521,7 @@ namespace TMPro.Examples
                 if (m_HandleSize < 1.0f)
                 {
                     GUIStyle style = new GUIStyle();
-                    style.normal.textColor = new Color(0.8f, 0.8f, 0.8f, 1.0f);
+                    style.normal.textColor = new UnityEngine.Color(0.8f, 0.8f, 0.8f, 1.0f);
                     style.fontSize = 12;
                     style.fixedWidth = 200;
                     style.fixedHeight = 20;
@@ -556,7 +556,7 @@ namespace TMPro.Examples
             Vector3 bottomLeft = m_TextComponent.transform.position + meshBounds.min;
             Vector3 topRight = m_TextComponent.transform.position + meshBounds.max;
 
-            DrawRectangle(bottomLeft, topRight, new Color(1, 0.5f, 0));
+            DrawRectangle(bottomLeft, topRight, new UnityEngine.Color(1, 0.5f, 0));
         }
 
 
@@ -567,7 +567,7 @@ namespace TMPro.Examples
             Vector3 bottomLeft = m_TextComponent.transform.position + (textBounds.center - textBounds.extents);
             Vector3 topRight = m_TextComponent.transform.position + (textBounds.center + textBounds.extents);
 
-            DrawRectangle(bottomLeft, topRight, new Color(0f, 0.5f, 0.5f));
+            DrawRectangle(bottomLeft, topRight, new UnityEngine.Color(0f, 0.5f, 0.5f));
         }
 
 

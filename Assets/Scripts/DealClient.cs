@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Fusion;
 
-public class DealClient : NetworkBehaviour
+public class DealClient : MonoBehaviour
     , IPointerClickHandler
 {
     public ObjectReferences Refs;
@@ -14,14 +14,14 @@ public class DealClient : NetworkBehaviour
 
     private void Awake()
     {
-        Setup = Refs.GameManager.GetComponent<Setup>();
+        Setup = Refs.Managers.GetComponent<Setup>();
         NRunner = Refs.Runner.GetComponent<NetworkRunner>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         gameObject.SetActive(false);
-        Setup.SetupGame(NRunner, Player);
+        Setup.H_Setup(Player);
     }
     /*
     [Rpc]

@@ -268,7 +268,7 @@ public abstract class FusionGraphBase : Fusion.Behaviour, IFusionStatsView {
     if (info.InvalidReason != null) {
       LabelTitle.text = info.InvalidReason;
       BackImage.gameObject.SetActive(false);
-      LabelTitle.color = _fusionStats.FontColor * new Color(1, 1, 1, 0.2f);
+            LabelTitle.color = _fusionStats.FontColor * new UnityEngine.Color(1, 1, 1, 0.2f);
     } else {
       var titleRT = LabelTitle.rectTransform;
       if (titleRT.rect.width < 100) {

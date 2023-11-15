@@ -605,7 +605,7 @@ public class FusionStats : Fusion.Behaviour {
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _graphColorGood = new Color(0.1f, 0.5f, 0.1f, 0.9f);
+  Color _graphColorGood = new UnityEngine.Color(0.1f, 0.5f, 0.1f, 0.9f);
 
   /// <summary>
   /// The color used for the telemetry graph data.
@@ -613,7 +613,7 @@ public class FusionStats : Fusion.Behaviour {
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _graphColorWarn = new Color(0.75f, 0.75f, 0.2f, 0.9f);
+  Color _graphColorWarn = new UnityEngine.Color(0.75f, 0.75f, 0.2f, 0.9f);
 
   /// <summary>
   /// The color used for the telemetry graph data.
@@ -621,7 +621,7 @@ public class FusionStats : Fusion.Behaviour {
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _graphColorBad = new Color(0.9f, 0.2f, 0.2f, 0.9f);
+  Color _graphColorBad = new UnityEngine.Color(0.9f, 0.2f, 0.2f, 0.9f);
 
   /// <summary>
   /// The color used for the telemetry graph data.
@@ -629,32 +629,32 @@ public class FusionStats : Fusion.Behaviour {
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _graphColorFlag = new Color(0.8f, 0.75f, 0.0f, 1.0f);
+  Color _graphColorFlag = new UnityEngine.Color(0.8f, 0.75f, 0.0f, 1.0f);
 
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _fontColor = new Color(1.0f, 1.0f, 1.0f, 1f);
+  Color _fontColor = new UnityEngine.Color(1.0f, 1.0f, 1.0f, 1f);
 
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color PanelColor = new Color(0.3f, 0.3f, 0.3f, 1.0f);
+  Color PanelColor = new UnityEngine.Color(0.3f, 0.3f, 0.3f, 1.0f);
 
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _simDataBackColor = new Color(0.1f, 0.08f, 0.08f, 1.0f);
+  Color _simDataBackColor = new UnityEngine.Color(0.1f, 0.08f, 0.08f, 1.0f);
 
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _netDataBackColor = new Color(0.15f, 0.14f, 0.09f, 1.0f);
+  Color _netDataBackColor = new UnityEngine.Color(0.15f, 0.14f, 0.09f, 1.0f);
 
   [InlineHelp]
   [SerializeField]
   [DrawIf(nameof(ShowColorControls), Hide = true)]
-  Color _objDataBackColor = new Color(0.0f, 0.2f, 0.4f, 1.0f);
+  Color _objDataBackColor = new UnityEngine.Color(0.0f, 0.2f, 0.4f, 1.0f);
 
   // IFusionStats interface requirements
   public Color FontColor        => _fontColor;
