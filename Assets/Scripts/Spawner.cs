@@ -4,7 +4,6 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Threading;
 
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -38,10 +37,26 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         });
     }
 
-    // INETWORKRUNNERCALLBACKS IMPLEMENTATION
+    public void OnEnable()
+    {
+        if (runner != null)
+        {
+            runner.AddCallbacks(this);
+        }
+    }
+
+    public void OnDisable()
+    {
+        if (runner != null)
+        {
+            runner.RemoveCallbacks(this);
+        }
+    }
+
+    // INetworkRunnerCallbacks
 
     public void OnConnectedToServer(NetworkRunner runner)
-    {   // LOGGED ON CLIENT WHEN CLIENT JOINS (after OnPlayerJoined)
+    {   // logged on client with client joins (after OnPlayerJoined)
         Debug.Log("OnConnectedToServer");
     }
 
@@ -54,32 +69,41 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnDisconnectedFromServer(NetworkRunner runner) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        CallInputStruct inputStruct = new();
+
+        inputStruct.buttons.Set(Buttons.Space, Input.GetKey(KeyCode.Space));
+        inputStruct.buttons.Set(Buttons.Return, Input.GetKey(KeyCode.Return));
+        inputStruct.buttons.Set(Buttons.Left, Input.GetKey(KeyCode.LeftArrow));
+        inputStruct.buttons.Set(Buttons.Right, Input.GetKey(KeyCode.RightArrow));
+
+        input.Set(inputStruct);
+    }
+
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
  
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    {   // LOGGED ON HOST WHEN HOST JOINS
-        // LOGGED ON HOST WHEN CLIENT JOINS
-        // LOGGED ON CLIENT WHEN CLIENT JOINS
+    {   // logged on host when host joins
+        // logged on host when client joins
+        // logged on client when client joins
         
         Debug.Log("OnPlayerJoined");
+
         if (runner.IsServer)
         {
-            Managers = runner.Spawn(Resources.Load<GameObject>("Prefabs/Managers")).gameObject;
-        }
-
-        if (player == runner.LocalPlayer)
-        {
-            
-            Setup = Refs.Managers.GetComponent<Setup>();
-            Debug.Log("Access Refs.Managers");
-            Setup.SetupGame(runner, player);
-        }
-        else if (runner.IsServer)
-        {
-            DealMe.GetComponent<DealClient>().Player = player;
-            DealMe.SetActive(true);
-        }
+            if (player == runner.LocalPlayer)
+            {
+                Managers = runner.Spawn(Resources.Load<GameObject>("Prefabs/Managers")).gameObject;
+                Managers.GetComponent<Setup>().H_Setup(player);
+            }
+            else
+            {
+                DealMe.GetComponent<DealClient>().Player = player;
+                DealMe.SetActive(true);
+            }
+        }        
     }
     
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }

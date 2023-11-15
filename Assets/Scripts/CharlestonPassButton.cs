@@ -10,8 +10,9 @@ public class CharlestonPassButton : MonoBehaviour
 
 {
     public ObjectReferences Refs;
-    private GameManager GManager;
-    private CharlestonManager CManager;
+    public GameManager GManager;
+    public CharlestonManager CManager;
+    private GameObject Charleston;
     private Button Button;
     private GameObject SkipButtonGO;
     private TextMeshProUGUI Text;
@@ -23,21 +24,12 @@ public class CharlestonPassButton : MonoBehaviour
         Button = GetComponent<Button>();
         SkipButtonGO = transform.parent.GetChild(2).gameObject;
         Text = GetComponentInChildren<TextMeshProUGUI>();
+        Charleston = transform.parent.gameObject;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!GManager)
-        {   // initialize these variables
-            GManager = Refs.Managers.GetComponent<GameManager>();
-            CManager = Refs.Managers.GetComponent<CharlestonManager>();
-        }
-
-        if (GManager.Offline)
-        {
-            CManager.C_StartPass();
-        }
-        else
+        if (Button.interactable)
         {
             Button.interactable = false;
             Text.SetText("Waiting for others");
@@ -45,21 +37,20 @@ public class CharlestonPassButton : MonoBehaviour
         }
     }
 
+    public void UpdateButton() { UpdateButton(CManager.Counter); }
+    
     public void UpdateButton(int counter)
     {
         // if Counter is -1 or 7, remove the button and start main gameplay
-
         if (counter == -1 || counter == 7)
         {
-            Button.gameObject.SetActive(false);
-            CManager.gameObject.SetActive(false);
-            SkipButtonGO.SetActive(false);
-            Refs.Managers.GetComponent<TurnManager>().StartGamePlay();
+            Charleston.SetActive(false);
+            Refs.Managers.GetComponent<TurnManager>().C_StartGamePlay();
             return;
         }
 
         // TODO: blind and optional passes
-        // TODO: press space to pass
+        // TODO: press space to pass 
 
         // if it's a blind pass, allow pass whenever.
         // otherwise, make button not interactable.
@@ -74,5 +65,8 @@ public class CharlestonPassButton : MonoBehaviour
         Text.SetText($"Pass {CManager.Direction()}");
     }
 
-
+    public void NoJokers()
+    {
+        Text.SetText("You can't pass jokers");
+    }
 }

@@ -15,6 +15,7 @@ public class TileLocomotion : MonoBehaviour
 {
     private ObjectReferences Refs;
     private GameManager GManager;
+    private CharlestonManager CManager;
     private EventSystem ESystem;
     public Transform TileTF;
     private Transform RackPrivateTF;
@@ -23,11 +24,20 @@ public class TileLocomotion : MonoBehaviour
     private Transform CharlestonBoxTF;
     private Transform DiscardTF;
     private TurnManager TManager;
+    private int TileID;
+
+    // lerp stuff
+    bool Lerping = false;
+    Vector3 StartPos;
+    Vector3 EndPos;
+    float TotalLerpTime = 0.2f;
+    float CurrentLerpTime = 0.2f;
 
     private void Awake()
     {
         Refs = GetComponentInParent<Tile>().Refs;
-        GManager = Refs.GameManager.GetComponent<GameManager>();
+        GManager = Refs.Managers.GetComponent<GameManager>();
+        CManager = Refs.Managers.GetComponent<CharlestonManager>();
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();
         TileTF = transform.parent;
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
@@ -35,53 +45,57 @@ public class TileLocomotion : MonoBehaviour
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
-        TManager = Refs.GameManager.GetComponent<TurnManager>();
+        TManager = Refs.Managers.GetComponent<TurnManager>();
+        TileID = GetComponentInParent<Tile>().ID;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Transform tileTF = eventData.pointerClick.transform;
         if (eventData.clickCount == 2)
         {
-            if (CharlestonBoxTF.gameObject.activeSelf)
-            { DoubleClickCharleston(tileTF); }
-            else if (TManager.TurnPlayerID == GManager.LocalPlayerID)
-            { DoubleClickDiscard(tileTF); }
-            // FIXME: this check is failing because TurnPlayerID doesn't get
-            // set until the first turn is happening.
+            if (CharlestonBoxTF.parent.gameObject.activeSelf)
+            { DoubleClickCharleston(); }
+            else if (TManager.ExposeTileName == transform.name)
+            { DoubleClickExpose(); }
+            else if (DiscardTF.GetComponentInChildren<Image>().raycastTarget)
+            { DoubleClickDiscard(); }
         }
     }
 
-    private void DoubleClickCharleston(Transform tileTF)
+    private void DoubleClickCharleston()
     {
-        if (tileTF.IsChildOf(RackPrivateTF))
+        if (transform.IsChildOf(RackPrivateTF))
         {
             for (int i = 0; i < 3; i++)
             {
                 Transform chSpot = CharlestonBoxTF.GetChild(i);
                 if (chSpot.childCount == 0)
                 {
-                    tileTF.GetComponent<TileLocomotion>().MoveTile(chSpot);
+                    MoveTile(chSpot);
                     break;
                 }
             }
-            if (tileTF.IsChildOf(RackPrivateTF))
+            if (transform.IsChildOf(RackPrivateTF))
             {
-                CharlestonBoxTF.GetChild(2).GetChild(0).GetChild(0)
-                               .GetComponent<TileLocomotion>()
+                CharlestonBoxTF.GetChild(2)
+                               .GetComponentInChildren<TileLocomotion>()
                                .MoveTile(RackPrivateTF);
-                tileTF.GetComponent<TileLocomotion>()
-                      .MoveTile(CharlestonBoxTF.GetChild(2));
+                MoveTile(CharlestonBoxTF.GetChild(2));
             }
-
-            CharlestonBoxTF.GetComponent<CharlestonManager>().C_CheckDone();
         }
-        else { tileTF.GetComponent<TileLocomotion>().MoveTile(RackPrivateTF); }
+        else { MoveTile(RackPrivateTF); }
+        CManager.C_CheckDone();
     }
 
-    private void DoubleClickDiscard(Transform tileTF)
+    void DoubleClickExpose()
     {
-        TManager.C_Discard(tileTF.parent);
+        TManager.C_Expose(TileID);
+        // TODO: add drag expose tag
+    }
+
+    void DoubleClickDiscard()
+    {
+        TManager.C_Discard(TileID);
     }
 
     public void OnSelect(BaseEventData eventData) { }
@@ -121,11 +135,11 @@ public class TileLocomotion : MonoBehaviour
 
         // discard
         else if (raycastTFs.Contains(DiscardTF))
-        { TManager.C_Discard(transform.parent); }
+        { TManager.C_Discard(TileID); }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
-        CharlestonBoxTF.GetComponent<CharlestonManager>().C_CheckDone();
+        CManager.C_CheckDone();
         TileImage.raycastTarget = true;     // undo OnBeginDrag things
     }
 
@@ -174,8 +188,6 @@ public class TileLocomotion : MonoBehaviour
         }
         else { charlestonSpotTF = raycastTF; }
         MoveTile(charlestonSpotTF);
-
-
     }
 
     void MoveBack()
@@ -183,21 +195,35 @@ public class TileLocomotion : MonoBehaviour
         MoveTile(TileTF.parent, TileTF.GetSiblingIndex());
     }
 
-    // will handle whether called from the tile or its face!
     public void MoveTile(Transform newParentTF, int newSibIx)
     {
-        Transform tileTF = transform.parent;
-        //if (CompareTag("Tile")) { tileTF = transform; }
-        //else { tileTF = transform.parent; }
+        if (transform.IsChildOf(Refs.TilePool.transform))
+        {
+            StartPos = new Vector3(100, 100, 100);
+        }
+        else { StartPos = transform.position; }
+        EndPos = newParentTF.position;
 
-        tileTF.SetParent(newParentTF);
-        if (newParentTF != RackPrivateTF) { tileTF.position = newParentTF.position; }
-        tileTF.SetSiblingIndex(newSibIx);
-        tileTF.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 0);
-        tileTF.GetChild(0).position = tileTF.position;
-        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)newParentTF);
+        TileTF.SetParent(newParentTF);
+        TileTF.SetSiblingIndex(newSibIx);
+        TileTF.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 0);
 
+        if (newParentTF == RackPrivateTF || newParentTF == DiscardTF)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)newParentTF);
+            EndPos = TileTF.position;
+        }
+
+        else
+        {
+            transform.parent.position = newParentTF.position;
+        }
+
+        Lerping = true;
+        
         // TODO: add racklist management?
+        // FIXME: newly dealt tiles should lerp from somewhere
+        // FIXME: when calling a tile it flashes briefly on rack before lerping
     }
 
     // overload without a sibling index. sends tile to last spot
@@ -208,21 +234,30 @@ public class TileLocomotion : MonoBehaviour
 
     public static void MoveTile(Transform tileTF, Transform destination)
     {
-        if (tileTF.CompareTag("Tile")) { tileTF = tileTF.GetChild(0); }
-        tileTF.GetComponent<TileLocomotion>().MoveTile(destination);
+        tileTF.GetComponentInChildren<TileLocomotion>().MoveTile(destination);
     }
 
     public static void MoveTile(int tileID, Transform destination)
-    { MoveTile(GameManager.TileList[tileID].transform, destination); }
-
-
-    /* deprecate?
-    private static void SetFaceBackToParent(PointerEventData eventData)
     {
-        Transform faceTF = eventData.pointerDrag.transform;
-        Transform tileTF = eventData.pointerDrag.GetComponent<TileLocomotion>().TileTF;
-        faceTF.SetParent(tileTF);
-        faceTF.position = tileTF.position;
+        MoveTile(GameManager.TileList[tileID].transform, destination);
     }
-    */
+    // FIXME: you can discard multiple tiles during discard 2 sec
+
+    private void Update()
+    {
+        if (Lerping)
+        {
+            float t = CurrentLerpTime / TotalLerpTime;
+            transform.position = Vector3.Lerp(StartPos, EndPos, t);
+
+            CurrentLerpTime += Time.deltaTime;
+            if (CurrentLerpTime > TotalLerpTime)
+            {
+                transform.position = transform.parent.position; // not EndPos because of weird rack shift bug
+                CurrentLerpTime = 0f;
+                Lerping = false;
+            }
+        }
+        
+    }
 }

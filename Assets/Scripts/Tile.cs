@@ -12,7 +12,6 @@ public class Tile : MonoBehaviour
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
         FaceTF = transform.GetChild(0);
-        // FIXME: tiles don't scale correctly
     }
 
     // NumberDragon OVERLOAD
@@ -51,4 +50,7 @@ public class Tile : MonoBehaviour
     {
         GetComponentInChildren<TileLocomotion>().MoveTile(toLoc);
     }
+
+    public bool IsJoker() { return name == "Joker"; }
+    public static bool IsJoker(int tileID) { return tileID >= 144; }
 }

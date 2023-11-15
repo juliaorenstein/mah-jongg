@@ -1,10 +1,8 @@
 using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Networking.Types;
 using System;
 
 public class CharlestonManager : NetworkBehaviour
@@ -13,37 +11,60 @@ public class CharlestonManager : NetworkBehaviour
     // everyone
     public ObjectReferences Refs;
     public Transform CharlestonTF;
+    public Transform CharlestonBoxTF;
     private Button PassButton;
+    private CharlestonPassButton PassButtonScript;
     private GameManager GManager;
     private Transform RackPrivateTF;
     private Transform TilePoolTF;
     private int[][] PassArr = new int[4][];
-    private int Counter { get; set; }
+
+    [Networked] public int Counter { get; set; }
 
     // host
     private int PlayersReady = 0;
 
-    private void Awake()
+    public override void Spawned()
     {
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
+        // FIXME: find call
         CharlestonTF = Refs.Charleston;
-        PassButton = Refs.CharlestonPassButton.GetComponent<Button>();
-        GManager = Refs.GameManager.GetComponent<GameManager>();
+        CharlestonBoxTF = CharlestonTF.GetChild(0);
+        PassButton = CharlestonTF.GetComponentInChildren<Button>();
+        PassButtonScript = PassButton.GetComponent<CharlestonPassButton>();
+        GManager = Refs.Managers.GetComponent<GameManager>();
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         TilePoolTF = Refs.TilePool.transform;
     }
 
+    // FIXME: first, second, and fifth (??) passes are not smooth
+    // FIXME: make passes come from the right direction
+
     public void C_CheckDone()
     {
         bool ready = true;
-        foreach (Transform chSpot in transform)
+        bool jokers = false;
+
+        foreach (Transform chSpot in CharlestonBoxTF)
         {
+            // check all spots are populated
             if (chSpot.childCount == 0)
             {
                 ready = false;
+                // don't break because we still want to check for jokers
+            }
+
+            // check that there are no jokers
+            else if (chSpot.GetChild(0).name == "Joker")
+            {
+                jokers = true;
+                ready = false;
+                PassButtonScript.NoJokers();
                 break;
             }
         }
 
+        if (!jokers) { PassButtonScript.UpdateButton(); }
         if (ready) { PassButton.interactable = true; }
         else { PassButton.interactable = false; }
     }
@@ -59,18 +80,17 @@ public class CharlestonManager : NetworkBehaviour
         int[] tileIDsToPass = new int[3];
         for (int i = 0; i < 3; i++)
         {
-            tileTF = transform.GetChild(i).GetChild(0);
+            tileTF = CharlestonBoxTF.GetChild(i).GetChild(0);
             tileTF.GetChild(0).GetComponent<TileLocomotion>().MoveTile(TilePoolTF);
             tileIDsToPass[i] = tileTF.GetComponent<Tile>().ID;
         }
 
         // give the tiles to the host
-        if (GManager.Offline) { H_StartPass(3, tileIDsToPass); }
-        else { RPC_C2H_StartPass(tileIDsToPass); }
-
+        //if (GManager.Offline) { H_StartPass(3, tileIDsToPass); }
+        //else { RPC_C2H_StartPass(tileIDsToPass); }
+        RPC_C2H_StartPass(tileIDsToPass);
         // prep for next pass
-        Counter++;
-        PassButton.GetComponent<CharlestonPassButton>().UpdateButton(Counter);
+
     }
 
     // send tiles from Client to Host
@@ -117,6 +137,7 @@ public class CharlestonManager : NetworkBehaviour
         int targetID;
         PlayerRef targetPlayerRef;
         int[] tileIDsToSend;
+        Counter++;
 
         foreach ((int sourceID, PlayerRef sourcePlayerRef) in GManager.PlayerDict)
         {
@@ -136,9 +157,7 @@ public class CharlestonManager : NetworkBehaviour
             // send to client
             if (targetPlayerRef != PlayerRef.None) // prevent host from receiving all the AI tiles
             {
-                if (GManager.Offline) { C_ReceiveTiles(tileIDsToSend); }
-                else { RPC_H2C_SendTiles(targetPlayerRef, tileIDsToSend); }
-                // FIXME: offline player is not receiving tiles from pass
+                RPC_H2C_SendTiles(targetPlayerRef, tileIDsToSend);
             }
         }
 
@@ -199,5 +218,7 @@ public class CharlestonManager : NetworkBehaviour
     {
         foreach (int tileID in tileIDsToReceive)
         { TileLocomotion.MoveTile(tileID, RackPrivateTF); }
+
+        PassButton.GetComponent<CharlestonPassButton>().UpdateButton();
     }
 }

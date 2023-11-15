@@ -10,6 +10,7 @@ public class ObjectReferences : MonoBehaviour
     public GameManager GameManager;
     public TurnManager TurnManager;
     public EventSystem EventSystem;
+    public GameObject Runner;
     public GameObject DealMe;
     public GameObject Board;
     public GameObject TilePool;
@@ -20,4 +21,5 @@ public class ObjectReferences : MonoBehaviour
     public Transform Charleston;
     public GameObject Discard;
     public GameObject TurnIndicator;
+    public GameObject CallWaitButtons;
 }

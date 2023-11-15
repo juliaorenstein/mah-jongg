@@ -1,65 +1,98 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Fusion;
-using UnityEngine.UI;
-using TMPro;
 using System.Linq;
+using Fusion;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class TurnManager : NetworkBehaviour
-    ,ISpawned
-    ,IAfterSpawned
 {
-    // everyone (local)
     public ObjectReferences Refs;
     private GameManager GManager;
     private Transform DiscardTF;
     private Transform LocalRackTF;
+    private List<Transform> OtherRacksTFs;
     private TextMeshProUGUI TurnIndicatorText;
+    private EventSystem ESystem;
+    private GameObject CallWaitButtons;
+    private GameObject WaitButton;
+    private GameObject PassButton;
+    private GameObject CallButton;
+    public string ExposeTileName;
 
-    // just for host
-    private List<List<GameObject>> RackLists;
+    // calling variables
+    private bool WaitingForCallers;
+    private bool PlayerThinking
+    {
+        get
+        {
+            return (Input.GetKeyDown(KeyCode.Space) &&
+                    WaitButton.activeSelf) ||
+                    ESystem.currentSelectedGameObject == WaitButton;
+        }
+    }
+    private bool PlayerPassing
+    {
+        get
+        {
+            return (Input.GetKeyDown(KeyCode.Space) &&
+                    PassButton.activeSelf) ||
+                    ESystem.currentSelectedGameObject == PassButton;
+        }
+    }
+    private bool PlayerCalling
+    {
+        get
+        {
+            return Input.GetKeyDown(KeyCode.Return) ||
+                ESystem.currentSelectedGameObject == CallButton;
+        }
+    }
 
     [Networked]
     public int TurnPlayerID { get; set; }
 
-    // FIXME: with 4 sessions open, discarding is synced :) But all players get
-    // the new tile and host is behind one turn on the display
-
     public override void Spawned()
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
-        // FIXME: Find call
+        // TODO: Don't use GameObject.Find
         GManager = GetComponent<GameManager>();
         DiscardTF = Refs.Discard.transform;
         LocalRackTF = Refs.LocalRack.transform;
-        RackLists = GManager.Racks;
         TurnIndicatorText = Refs.TurnIndicator
                                 .transform
                                 .GetChild(0)
                                 .GetComponent<TextMeshProUGUI>();
-    }
+        TurnPlayerID = GManager.DealerID;
+        ESystem = Refs.EventSystem;
+        CallWaitButtons = Refs.CallWaitButtons;
+        WaitButton = CallWaitButtons.transform.GetChild(0).gameObject;
+        PassButton = CallWaitButtons.transform.GetChild(1).gameObject;
+        CallButton = CallWaitButtons.transform.GetChild(2).gameObject;
 
-    public void AfterSpawned()
-    {
-        TurnPlayerID = GManager.Dealer;
     }
 
     // Setup first turn
-    public void StartGamePlay()
+    public void C_StartGamePlay()
     {
         DiscardTF.gameObject.SetActive(true);
         UpdateTurnIndicator();
-        if (GManager.LocalPlayerID == GManager.Dealer)
+        if (GManager.DealerID == GManager.LocalPlayerID)
         {
             DiscardTF.GetComponent<Image>().raycastTarget = true;
+        }
+        else if (GManager.PlayerDict[GManager.DealerID] == PlayerRef.None)
+        {
+            H_AITurn(GManager.Racks[GManager.DealerID].Last().GetComponent<Tile>().ID);
         }
     }
 
     // Client discards a tile
-    public void C_Discard(Transform discardTileTF)
+    public void C_Discard(int discardTileID)
     {
-        RPC_C2H_Discard(discardTileTF.GetComponent<Tile>().ID);
+        RPC_C2H_Discard(discardTileID);
         DiscardTF.GetComponent<Image>().raycastTarget = false;
     }
 
@@ -68,31 +101,25 @@ public class TurnManager : NetworkBehaviour
     void RPC_C2H_Discard(int discardTileID, RpcInfo info = default)
     {
         int discardPlayerID = info.Source.PlayerId;
-        H_NextTurn(discardTileID, discardPlayerID);
+        H_Discard(discardTileID, discardPlayerID);
     }
 
     // Server does next turn logic
-    void H_NextTurn(int discardTileID, int discardPlayerID)
+    void H_Discard(int discardTileID, int discardPlayerID)
     {
         // update lists
-        RackLists[discardPlayerID].Remove(GameManager.TileList[discardTileID]);
-
-        // increment turn player
-        UpdateTurnPlayerID();
+        GManager.Racks[discardPlayerID].Remove(GameManager.TileList[discardTileID]);
         RPC_H2A_ShowDiscard(discardTileID);
 
-        // TODO: wait for call
-
-        PlayerRef nextPlayer = GManager.PlayerDict[TurnPlayerID];   // set next player
-        GameObject nextTile = GManager.Wall.Pop();                  // set next tile from wall
-        GManager.Racks[TurnPlayerID].Add(nextTile);                 // add that tile to the player's rack list
-        int nextTileID = GameManager.TileList.IndexOf(nextTile);    // find the ID of that til
-        if (nextPlayer == PlayerRef.None) { H_AITurn(nextTileID); }   // if it's AI, do that turn
-        RPC_H2C_NextTurn(nextPlayer, nextTileID);         // if it's a person, hand it over to that client
-        
+        // wait for callers
+        if (!Tile.IsJoker(discardTileID))
+        {
+            WaitingForCallers = true;
+            CallWaitButtons.SetActive(true);
+        }
+        else { StartCoroutine(WaitForJoker()); }
+        //StartCoroutine(WaitForCallers());
     }
-    // FIXME: with >1 player, the discard is showing up fine for clients but showing up in the rack
-    // for the host
 
     // RPC discard server to all
     [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
@@ -103,8 +130,123 @@ public class TurnManager : NetworkBehaviour
     void C_ShowDiscard(int discardTileID)
     {
         MoveTile(discardTileID, DiscardTF);
-        UpdateTurnIndicator();
+        GameManager.TileList[discardTileID]
+                   .GetComponentInChildren<Image>()
+                   .raycastTarget = false;
     }
+
+    private bool WaitingForPlayer = false;
+    private float timer = 0f;
+
+    void Update()
+    {
+        if (!WaitingForCallers) { return; }
+        if (!WaitingForPlayer)
+        {
+            timer += Time.deltaTime;
+
+            // Check for specific inputs here
+            if (PlayerThinking)
+            {
+                WaitButton.SetActive(false);
+                PassButton.SetActive(true);
+                WaitingForPlayer = true;
+                StartCoroutine(WaitForSpaceRelease(0.3f));
+            }
+            else if (PlayerCalling)
+            {
+                Call();
+            }
+            else if (timer >= 2f)
+            {
+                Pass();
+            }
+        }
+        else
+        {
+            if (PlayerPassing)
+            {
+                StartCoroutine(WaitForSpaceRelease(0.3f));
+                Pass();
+            }
+            else if (PlayerCalling)
+            {
+                Call();
+            }
+        }
+    }
+
+    IEnumerator WaitForSpaceRelease(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+    }
+
+    // TODO: when calling, the tile should go to public rack
+
+    // TODO: if a joker is discarded it can't be called
+    // TODO: implement validation on calling
+
+    void Call()
+    {
+        TurnPlayerID = Runner.LocalPlayer.PlayerId;
+        H_CallTurn();
+    }
+
+    void Pass()
+    {
+        TurnPlayerID = (TurnPlayerID + 1) % 4;
+        H_NextTurn();
+    }
+
+    IEnumerator WaitForJoker()
+    {
+        yield return new WaitForSeconds(2);
+        H_NextTurn();
+    }
+
+    void H_NextTurn()
+    {
+        PlayerRef nextPlayer = InitializeNextTurn();
+        GameObject nextTile = GManager.Wall.Pop();
+        nextTile.GetComponentInChildren<Image>().raycastTarget = true;
+        
+        GManager.Racks[TurnPlayerID].Add(nextTile);                 // add that tile to the player's rack list
+        int nextTileID = GameManager.TileList.IndexOf(nextTile);    // find the ID of that tile
+        if (nextPlayer == PlayerRef.None)                           // AI turn
+        {
+            H_AITurn(nextTileID);
+            return;
+        }
+        RPC_H2C_NextTurn(nextPlayer, nextTileID);         // if it's a person, hand it over to that client
+    }
+
+    void H_CallTurn()
+    {
+        PlayerRef callPlayer = InitializeNextTurn();
+        GameObject callTile = DiscardTF.GetChild(DiscardTF.childCount - 1).gameObject;
+
+        GManager.Racks[TurnPlayerID].Add(callTile); // TODO: track public tiles separately
+        int callTileID = GameManager.TileList.IndexOf(callTile);
+        // TODO: AI support for calling
+        RPC_H2C_CallTurn(callPlayer, callTileID);
+    }
+
+    PlayerRef InitializeNextTurn()
+    {
+        ESystem.SetSelectedGameObject(null);
+        WaitButton.SetActive(true);
+        PassButton.SetActive(false);
+        WaitingForCallers = false;
+        WaitingForPlayer = false;
+        CallWaitButtons.SetActive(false);
+        timer = 0f;
+
+        UpdateTurnIndicator();
+        return GManager.PlayerDict[TurnPlayerID];   // set next player
+    }
+
+    // TODO: test network input, then implement into calling mechanism
+    // TODO: add ability to navigate rack with arrow keys
 
     // RPC sends next tile to client
     [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
@@ -118,24 +260,45 @@ public class TurnManager : NetworkBehaviour
         DiscardTF.GetComponent<Image>().raycastTarget = true; // enable discard
     }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    void RPC_H2C_CallTurn([RpcTarget] PlayerRef _, int callTileID)
+    { C_CallTurn(callTileID); }
+
+    void C_CallTurn(int callTileID)
+    {
+        MoveTile(callTileID, LocalRackTF.GetChild(0));
+
+        // TODO: Add validation to make sure this is a legit hand? Or are players on their own
+        ExposeTileName = GameManager.TileList[callTileID].name;
+    }
+
+    public void C_Expose(int exposeTileID)
+    {
+        MoveTile(exposeTileID, LocalRackTF.GetChild(0));
+        RPC_C2A_Expose(exposeTileID);
+        ExposeTileName = null;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All, HostMode = RpcHostMode.SourceIsHostPlayer, InvokeLocal = false)]
+    void RPC_C2A_Expose(int exposeTileID, RpcInfo info = default)
+    {
+        Transform exposePlayerRack = OtherRacksTFs[info.Source.PlayerId];
+        Destroy(exposePlayerRack.GetChild(0).GetChild(0).gameObject);
+        MoveTile(exposeTileID, exposePlayerRack.GetChild(1));
+    }
+
     void H_AITurn(int newTileID)
     {
         int discardTileID = newTileID; // for now just discard what was picked up
-        H_NextTurn(discardTileID, TurnPlayerID);
+        H_Discard(discardTileID, TurnPlayerID);
     }
 
     // Helper function to move tiles
     void MoveTile(int tileID, Transform destination)
     {
         GameManager.TileList[tileID].transform
-                        .GetChild(0)
-                        .GetComponent<TileLocomotion>()
-                        .MoveTile(destination);
-    }
-
-    void UpdateTurnPlayerID()
-    {
-        TurnPlayerID = (TurnPlayerID + 1) % 4;
+                   .GetComponentInChildren<TileLocomotion>()
+                   .MoveTile(destination);
     }
 
     void UpdateTurnIndicator()

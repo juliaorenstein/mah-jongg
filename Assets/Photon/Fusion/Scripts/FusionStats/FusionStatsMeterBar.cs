@@ -41,7 +41,7 @@ public class FusionStatsMeterBar : FusionGraphBase
   Color CurrentColor;
 
 
-  protected override Color BackColor => base.BackColor * new Color(.5f, .5f, .5f, 1);
+  protected override Color BackColor => base.BackColor * new UnityEngine.Color(.5f, .5f, .5f, 1);
 
 #if UNITY_EDITOR
 

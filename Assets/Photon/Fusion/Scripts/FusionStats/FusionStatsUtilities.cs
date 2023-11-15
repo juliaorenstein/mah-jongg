@@ -55,7 +55,7 @@ namespace Fusion.StatsInternal {
           var tex = new Texture2D(METER_TEXTURE_WIDTH, 2);
           for (int x = 0; x < METER_TEXTURE_WIDTH; ++x) {
             for (int y = 0; y < 2; ++y) {
-              var color = (x != 0 && x % 16 == 0) ? new Color(1f, 1f, 1f, 0.75f) : new Color(1f, 1f, 1f, 1f);
+              var color = (x != 0 && x % 16 == 0) ? new UnityEngine.Color(1f, 1f, 1f, 0.75f) : new UnityEngine.Color(1f, 1f, 1f, 1f);
               tex.SetPixel(x, y, color);
             }
           }
@@ -88,7 +88,7 @@ namespace Fusion.StatsInternal {
             for (int y = 0; y < R; ++y) {
               double h = System.Math.Abs( System.Math.Sqrt(x * x + y * y));
               float a = h > R ? 0.0f : h < (R - 1) ? 1.0f :(float) (R - h);
-              var c = new Color(1.0f, 1.0f, 1.0f, a);
+              var c = new UnityEngine.Color(1.0f, 1.0f, 1.0f, a);
               tex.SetPixel(R + 0 + x, R + 0 + y, c);
               tex.SetPixel(R - 1 - x, R + 0 + y, c);
               tex.SetPixel(R + 0 + x, R - 1 - y, c);
@@ -113,9 +113,9 @@ namespace Fusion.StatsInternal {
       }
     }
 
-    public static Color DARK_GREEN = new Color(0.0f, 0.5f, 0.0f, 1.0f);
-    public static Color DARK_BLUE  = new Color(0.0f, 0.0f, 0.5f, 1.0f);
-    public static Color DARK_RED   = new Color(0.5f, 0.0f, 0.0f, 1.0f);
+    public static Color DARK_GREEN = new UnityEngine.Color(0.0f, 0.5f, 0.0f, 1.0f);
+    public static Color DARK_BLUE  = new UnityEngine.Color(0.0f, 0.0f, 0.5f, 1.0f);
+    public static Color DARK_RED   = new UnityEngine.Color(0.5f, 0.0f, 0.0f, 1.0f);
 
     public static bool TryFindActiveRunner(FusionStats fusionStats, out NetworkRunner runner, SimulationModes? mode = null) {
 
@@ -179,7 +179,7 @@ namespace Fusion.StatsInternal {
 
       var dropimg = dropRT.gameObject.AddComponent<UI.Image>();
       var dropdown = dropRT.gameObject.AddComponent<UI.Dropdown>();
-      dropimg.color = new Color(0, 0, 0, 0);
+      dropimg.color = new UnityEngine.Color(0, 0, 0, 0);
       dropdown.image = dropimg;
       
       var templateRT = dropRT.CreateRectTransform("Template", true)
@@ -198,10 +198,10 @@ namespace Fusion.StatsInternal {
       var toggle = itemRT.gameObject.AddComponent<UI.Toggle>();
       toggle.colors = new UI.ColorBlock() {
         colorMultiplier = 1,
-        normalColor = new Color(0.2f, 0.2f, 0.2f, 1f),
-        highlightedColor = new Color(.3f, .3f, .3f, 1f),
-        pressedColor = new Color(.4f, .4f, .4f, 4f),
-        selectedColor = new Color(.25f, .25f, .25f, 1f),
+        normalColor = new UnityEngine.Color(0.2f, 0.2f, 0.2f, 1f),
+        highlightedColor = new UnityEngine.Color(.3f, .3f, .3f, 1f),
+        pressedColor = new UnityEngine.Color(.4f, .4f, .4f, 4f),
+        selectedColor = new UnityEngine.Color(.25f, .25f, .25f, 1f),
       };
       var itemBackRT = itemRT.CreateRectTransform("Item Background", true);
       var itemBack = itemBackRT.gameObject.AddComponent<UI.Image>();
@@ -294,10 +294,10 @@ namespace Fusion.StatsInternal {
       text.horizontalOverflow   = HorizontalWrapMode.Overflow;
 
       UI.ColorBlock colors = button.colors;
-      colors.normalColor      = new Color(.0f, .0f, .0f, BTTN_ALPHA);
-      colors.pressedColor     = new Color(.5f, .5f, .5f, BTTN_ALPHA);
-      colors.highlightedColor = new Color(.3f, .3f, .3f, BTTN_ALPHA);
-      colors.selectedColor    = new Color(.0f, .0f, .0f, BTTN_ALPHA);
+      colors.normalColor      = new UnityEngine.Color(.0f, .0f, .0f, BTTN_ALPHA);
+      colors.pressedColor     = new UnityEngine.Color(.5f, .5f, .5f, BTTN_ALPHA);
+      colors.highlightedColor = new UnityEngine.Color(.3f, .3f, .3f, BTTN_ALPHA);
+      colors.selectedColor    = new UnityEngine.Color(.0f, .0f, .0f, BTTN_ALPHA);
       button.colors           = colors;
 
       button.onClick.AddListener(action);
@@ -416,12 +416,12 @@ namespace Fusion.StatsInternal {
 
     internal static RectTransform MakeGuides(this RectTransform parent) {
 
-      var outlineColor = new Color(0.5f, 0.5f, 0.5f, 0.75f);
+      var outlineColor = new UnityEngine.Color(0.5f, 0.5f, 0.5f, 0.75f);
       var rect = parent.CreateRectTransform("Guides", true);
       rect.SetSiblingIndex(0);
 
       var back = rect.CreateRectTransform("Back", true);
-      back.gameObject.AddComponent<UI.Image>().color = new Color(0.5f, 0.5f, 0.5f, 0.25f);
+      back.gameObject.AddComponent<UI.Image>().color = new UnityEngine.Color(0.5f, 0.5f, 0.5f, 0.25f);
 
       var left = rect.CreateRectTransform("Left", true);
       left.anchorMin = new Vector2(-GUIDE_MARGIN, 0);

@@ -6,13 +6,13 @@ using Fusion;
 public class GameManager : MonoBehaviour
 {
     public ObjectReferences Refs;
-    public bool Offline = false;
     public int LocalPlayerID;
-    public int Dealer;
+    public int DealerID;
     public static IList<GameObject> TileList;
     public Dictionary<int, PlayerRef> PlayerDict = new();
     public List<List<GameObject>> Racks = new();
     public Stack<GameObject> Wall = new();
+    public int WaitTime;
 
     private void Awake()
     {
@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
         {
             PlayerDict[playerID] = PlayerRef.None;
         }
+
+        WaitTime = 2000; // players have 2 seconds to call a tile (or say "wait")
     }
 }
 

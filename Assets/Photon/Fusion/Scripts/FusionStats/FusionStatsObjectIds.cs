@@ -21,9 +21,9 @@ public class FusionStatsObjectIds : Fusion.Behaviour, IFusionStatsView {
     _fusionStats = GetComponentInParent<FusionStats>();
   }
 
-  static Color _noneAuthColor  = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-  static Color _inputAuthColor = new Color(0.1f, 0.6f, 0.1f, 1.0f);
-  static Color _stateAuthColor = new Color(0.8f, 0.4f, 0.0f, 1.0f);
+  static Color _noneAuthColor  = new UnityEngine.Color(0.2f, 0.2f, 0.2f, 0.9f);
+  static Color _inputAuthColor = new UnityEngine.Color(0.1f, 0.6f, 0.1f, 1.0f);
+  static Color _stateAuthColor = new UnityEngine.Color(0.8f, 0.4f, 0.0f, 1.0f);
 
   void IFusionStatsView.Initialize() {
 
