@@ -6,11 +6,11 @@ using UnityEngine.UI;
 
 public class StartNetworkButton : MonoBehaviour, IPointerClickHandler
 {
-    private Spawner spawner;
+    private NetworkCallbacks spawner;
 
     private void Awake()
     {
-        spawner = GameObject.Find("NetworkRunner").GetComponent<Spawner>();
+        spawner = GameObject.Find("NetworkRunner").GetComponent<NetworkCallbacks>();
     }
 
     public void OnPointerClick(PointerEventData eventData)

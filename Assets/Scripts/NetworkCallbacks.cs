@@ -4,20 +4,26 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
-public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
+public class NetworkCallbacks : MonoBehaviour
+    , INetworkRunnerCallbacks
 {
     // GAME OBJECTS
     [SerializeField]
     private ObjectReferences Refs;
     private NetworkRunner runner;
-    private Setup Setup;
+    private EventSystem ESystem;
     private GameObject DealMe;
     private GameObject Managers;
+    public Transform ButtonsTF;
+
 
     private void Awake()
     {   // INITIALIZE GAME OBJECT FIELDS
         DealMe = Refs.DealMe;
+        ButtonsTF = Refs.CallWaitButtons.transform;
+        ESystem = Refs.EventSystem;
     }
 
     public async void StartGame(GameMode mode)
@@ -35,14 +41,6 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
             PlayerCount = 4
         });
-    }
-
-    public void OnEnable()
-    {
-        if (runner != null)
-        {
-            runner.AddCallbacks(this);
-        }
     }
 
     public void OnDisable()
@@ -72,14 +70,23 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        CallInputStruct inputStruct = new();
+        CallInputStruct inputStruct = new()
+        {
+            wait = (Input.GetKey(KeyCode.Space)
+            && ButtonsTF.GetChild(0).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(0).gameObject,
 
-        inputStruct.buttons.Set(Buttons.Space, Input.GetKey(KeyCode.Space));
-        inputStruct.buttons.Set(Buttons.Return, Input.GetKey(KeyCode.Return));
-        inputStruct.buttons.Set(Buttons.Left, Input.GetKey(KeyCode.LeftArrow));
-        inputStruct.buttons.Set(Buttons.Right, Input.GetKey(KeyCode.RightArrow));
+            pass = (Input.GetKey(KeyCode.Space)
+            && ButtonsTF.GetChild(1).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(1).gameObject,
+
+            call = (Input.GetKey(KeyCode.Return)
+            && ButtonsTF.GetChild(2).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(2).gameObject
+        };
 
         input.Set(inputStruct);
+        ESystem.SetSelectedGameObject(null);
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }

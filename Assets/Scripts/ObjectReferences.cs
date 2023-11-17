@@ -10,6 +10,7 @@ public class ObjectReferences : MonoBehaviour
     public GameManager GameManager;
     public TurnManager TurnManager;
     public EventSystem EventSystem;
+    public NetworkCallbacks NetworkCallbacks;
     public GameObject Runner;
     public GameObject DealMe;
     public GameObject Board;

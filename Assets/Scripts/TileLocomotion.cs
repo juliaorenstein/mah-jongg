@@ -30,7 +30,7 @@ public class TileLocomotion : MonoBehaviour
     bool Lerping = false;
     Vector3 StartPos;
     Vector3 EndPos;
-    float TotalLerpTime = 0.2f;
+    readonly float TotalLerpTime = 0.2f;
     float CurrentLerpTime = 0.2f;
 
     private void Awake()
@@ -46,6 +46,10 @@ public class TileLocomotion : MonoBehaviour
         CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
         TManager = Refs.Managers.GetComponent<TurnManager>();
+    }
+
+    private void Start()
+    {
         TileID = GetComponentInParent<Tile>().ID;
     }
 
