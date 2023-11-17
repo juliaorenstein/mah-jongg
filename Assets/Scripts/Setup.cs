@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using Fusion;
 using UnityEngine;
-using UnityEngine.UI;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
 
 
 public class Setup : NetworkBehaviour
@@ -21,6 +18,7 @@ public class Setup : NetworkBehaviour
     // PREFABS
     private GameObject TilePF;
     private GameObject TileBackPF;
+    private GameObject InputObjectPF;
 
     // OTHER FIELDS
     public int TileID;
@@ -43,6 +41,7 @@ public class Setup : NetworkBehaviour
         OtherRacksTF = Refs.OtherRacks.transform;
         TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
+        InputObjectPF = Resources.Load<GameObject>("Prefabs/Input Object");
         C_Setup();
     }
 
@@ -57,7 +56,7 @@ public class Setup : NetworkBehaviour
         HideButtons();                      // hide start buttons
         PopulateOtherRacks();               // show the other player's racks
         
-        if (Runner.IsServer)
+        if (Runner.IsServer)    // one time actiosns when the host joins
         {
             Shuffle();
             Deal();
@@ -66,12 +65,15 @@ public class Setup : NetworkBehaviour
 
     public void H_Setup(PlayerRef player)
     {
+        NetworkObject newInputObj = Runner.Spawn(InputObjectPF);
         GManager.PlayerDict[player.PlayerId] = player;
+        GManager.InputDict.Add(player.PlayerId, newInputObj.GetComponent<InputCollection>());
+        newInputObj.AssignInputAuthority(player);
         int[] tileArr = PrepRackForClient(player.PlayerId);
         RPC_SendRackToPlayer(player, tileArr);
     }
 
-    public void CreateTiles()
+    void CreateTiles()
     {
         CreateNumberDragons();
         CreateFlowerWinds();

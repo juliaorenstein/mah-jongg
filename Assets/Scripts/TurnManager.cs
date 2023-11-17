@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Windows;
 
 public class TurnManager : NetworkBehaviour
 {
@@ -22,44 +23,19 @@ public class TurnManager : NetworkBehaviour
     private GameObject CallButton;
     private NetworkObject NO;
     public string ExposeTileName;
+    private Dictionary<int,bool> PlayersWaiting;
+    private bool AnyPlayerWaiting
+    { get { return PlayersWaiting.Values.Any(val => val); } }
 
-    // calling variables
-    
+    private Dictionary<int, bool> PlayersPassing;
+    private bool AnyPlayerPassing
+    { get { return PlayersPassing.Values.Any(val => val); } }
+
+    private Dictionary<int, bool> PlayersCalling;
+    private bool AnyPlayerCalling
+    { get { return PlayersCalling.Values.Any(val => val); } }
+
     private bool WaitingForCallers;
-    /*
-    private bool PlayerThinking
-    {
-        get
-        {
-            if (!GetInput(out CallInputStruct input)) { return false; }
-            
-            return (input.buttons.IsSet(Buttons.Space) &&
-                    WaitButton.activeSelf) ||
-                    ESystem.currentSelectedGameObject == WaitButton;
-        }
-    }
-    private bool PlayerPassing
-    {
-        get
-        {
-            if (!GetInput(out CallInputStruct input)) { return false; }
-
-            return (input.buttons.IsSet(Buttons.Space) &&
-                    PassButton.activeSelf) ||
-                    ESystem.currentSelectedGameObject == PassButton;
-        }
-    }
-    private bool PlayerCalling
-    {
-        get
-        {
-            if (!GetInput(out CallInputStruct input)) { return false; }
-            
-            return (input.buttons.IsSet(Buttons.Space) ||
-                ESystem.currentSelectedGameObject == CallButton;
-        }
-    }
-    */
 
     [Networked]
     public int TurnPlayerID { get; set; }
@@ -80,14 +56,26 @@ public class TurnManager : NetworkBehaviour
         UpdateCurrentPlayer();
         ESystem = Refs.EventSystem;
         CallWaitButtons = Refs.CallWaitButtons;
+
         WaitButton = CallWaitButtons.transform.GetChild(0).gameObject;
         PassButton = CallWaitButtons.transform.GetChild(1).gameObject;
         CallButton = CallWaitButtons.transform.GetChild(2).gameObject;
+
+        PlayersWaiting = new();
+        PlayersPassing = new();
+        PlayersCalling = new();
     }
 
     // Setup first turn
     public void C_StartGamePlay()
     {
+        foreach (int playerID in GManager.InputDict.Keys)
+        {
+            PlayersWaiting[playerID] = false;
+            PlayersPassing[playerID] = false;
+            PlayersCalling[playerID] = false;
+        }
+
         DiscardTF.gameObject.SetActive(true);
         if (GManager.DealerID == GManager.LocalPlayerID)
         {
@@ -151,52 +139,35 @@ public class TurnManager : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         if (!WaitingForCallers) { return; }
-        GetInput(out CallInputStruct input);
+
+        foreach ((int playerID, InputCollection playerInput) in GManager.InputDict)
+        {
+            PlayersWaiting[playerID] = playerInput.wait;
+            PlayersPassing[playerID] = playerInput.pass;
+            PlayersCalling[playerID] = playerInput.call;
+        }
 
         if (!WaitingForPlayer)
         {
             timer += Time.deltaTime;
 
             // Check for specific inputs here
-            if (input.wait)
+            if (AnyPlayerWaiting)
             {
-                StartCoroutine(SpaceBarThenEnablePass(0.5f));
                 WaitButton.SetActive(false);
+                PassButton.SetActive(true);
                 WaitingForPlayer = true;
             }
-            else if (input.call)
-            {
-                Call();
-            }
-            else if (timer >= 2f)
-            {
-                Pass();
-            }
+            else if (AnyPlayerCalling) { Call(); }
+            else if (timer >= 2f) { Pass(); }
         }
         else
         {
-            if (input.pass)
-            {
-                StartCoroutine(SpaceBarThenDoPass(0.5f));
-            }
-            else if (input.call)
-            {
-                Call();
-            }
+            if (AnyPlayerPassing) { Pass(); }
+            else if (AnyPlayerCalling) { Call(); }
         }
     }
 
-    IEnumerator SpaceBarThenEnablePass(float waitTime)
-    {
-        yield return new WaitForSeconds(waitTime);
-        PassButton.SetActive(true);
-    }
-
-    IEnumerator SpaceBarThenDoPass(float waitTime)
-    {
-        yield return new WaitForSeconds(waitTime);
-        Pass();
-    }
     // TODO: when calling, the tile should go to public rack
 
     // TODO: if a joker is discarded it can't be called
@@ -249,7 +220,7 @@ public class TurnManager : NetworkBehaviour
 
     PlayerRef InitializeNextTurn()
     {
-        ESystem.SetSelectedGameObject(null);
+        //ESystem.SetSelectedGameObject(null);
         WaitButton.SetActive(true);
         PassButton.SetActive(false);
         WaitingForCallers = false;
@@ -323,5 +294,5 @@ public class TurnManager : NetworkBehaviour
         NO.AssignInputAuthority(GManager.PlayerDict[TurnPlayerID]);
     }
 
-    // FIXME: waiting and calling is not working
+    // TODO: this class is huuuuge
 }

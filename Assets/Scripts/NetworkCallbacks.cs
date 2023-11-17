@@ -17,6 +17,7 @@ public class NetworkCallbacks : MonoBehaviour
     private GameObject DealMe;
     private GameObject Managers;
     public Transform ButtonsTF;
+    private CallInputStruct inputStruct = new();
 
 
     private void Awake()
@@ -41,6 +42,8 @@ public class NetworkCallbacks : MonoBehaviour
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
             PlayerCount = 4
         });
+
+        runner.AddCallbacks(this);
     }
 
     public void OnDisable()
@@ -68,23 +71,23 @@ public class NetworkCallbacks : MonoBehaviour
     public void OnDisconnectedFromServer(NetworkRunner runner) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
 
+    private void Update()
+    {
+        inputStruct.turnOptions.Set(TurnButtons.wait, (Input.GetKeyDown(KeyCode.Space)
+            && ButtonsTF.GetChild(0).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(0).gameObject);
+
+        inputStruct.turnOptions.Set(TurnButtons.pass, (Input.GetKeyDown(KeyCode.Space)
+            && ButtonsTF.GetChild(1).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(1).gameObject);
+
+        inputStruct.turnOptions.Set(TurnButtons.call, (Input.GetKeyDown(KeyCode.Return)
+            && ButtonsTF.GetChild(2).gameObject.activeSelf)
+            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(2).gameObject);
+    }
+
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        CallInputStruct inputStruct = new()
-        {
-            wait = (Input.GetKey(KeyCode.Space)
-            && ButtonsTF.GetChild(0).gameObject.activeSelf)
-            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(0).gameObject,
-
-            pass = (Input.GetKey(KeyCode.Space)
-            && ButtonsTF.GetChild(1).gameObject.activeSelf)
-            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(1).gameObject,
-
-            call = (Input.GetKey(KeyCode.Return)
-            && ButtonsTF.GetChild(2).gameObject.activeSelf)
-            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(2).gameObject
-        };
-
         input.Set(inputStruct);
         ESystem.SetSelectedGameObject(null);
     }

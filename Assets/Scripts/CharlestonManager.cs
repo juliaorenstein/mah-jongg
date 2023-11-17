@@ -106,9 +106,10 @@ public class CharlestonManager : NetworkBehaviour
         // if there are AI players, figure out their passes when the first player is ready
         if (PlayersReady == 0)
         {
-            foreach ((int playerID, PlayerRef player) in GManager.PlayerDict)
+            for (int playerID = 0; playerID < 4; playerID++)
             {
-                if (player == PlayerRef.None) { H_AICharlestonPass(playerID); }
+                if (GManager.PlayerDict[playerID] == PlayerRef.None)
+                { H_AICharlestonPass(playerID); }
             }
         }
 
@@ -139,7 +140,7 @@ public class CharlestonManager : NetworkBehaviour
         int[] tileIDsToSend;
         Counter++;
 
-        foreach ((int sourceID, PlayerRef sourcePlayerRef) in GManager.PlayerDict)
+        for (int sourceID = 0; sourceID < 4; sourceID++)
         {
             targetID = PassTargetID(sourceID, Direction());
             targetPlayerRef = GManager.PlayerDict[targetID];

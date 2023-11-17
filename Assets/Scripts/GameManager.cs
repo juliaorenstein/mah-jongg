@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Fusion;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class GameManager : MonoBehaviour
     public int DealerID;
     public static IList<GameObject> TileList;
     public Dictionary<int, PlayerRef> PlayerDict = new();
+    public Dictionary<int, InputCollection> InputDict = new();
     public List<List<GameObject>> Racks = new();
     public Stack<GameObject> Wall = new();
     public int WaitTime;
