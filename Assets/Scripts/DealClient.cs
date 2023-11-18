@@ -23,11 +23,4 @@ public class DealClient : MonoBehaviour
         gameObject.SetActive(false);
         Setup.H_Setup(Player);
     }
-    /*
-    [Rpc]
-    public void RPC_Test()
-    {
-        Debug.Log("RPC");
-    }
-    */
 }

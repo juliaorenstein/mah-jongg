@@ -16,13 +16,12 @@ public class TurnManager : NetworkBehaviour
     private Transform LocalRackTF;
     private List<Transform> OtherRacksTFs;
     private TextMeshProUGUI TurnIndicatorText;
-    private EventSystem ESystem;
     private GameObject CallWaitButtons;
     private GameObject WaitButton;
     private GameObject PassButton;
-    private GameObject CallButton;
     private NetworkObject NO;
     public string ExposeTileName;
+
     private Dictionary<int,bool> PlayersWaiting;
     private bool AnyPlayerWaiting
     { get { return PlayersWaiting.Values.Any(val => val); } }
@@ -54,12 +53,10 @@ public class TurnManager : NetworkBehaviour
         NO = GetComponent<NetworkObject>();
         TurnPlayerID = GManager.DealerID;
         UpdateCurrentPlayer();
-        ESystem = Refs.EventSystem;
         CallWaitButtons = Refs.CallWaitButtons;
 
         WaitButton = CallWaitButtons.transform.GetChild(0).gameObject;
         PassButton = CallWaitButtons.transform.GetChild(1).gameObject;
-        CallButton = CallWaitButtons.transform.GetChild(2).gameObject;
 
         PlayersWaiting = new();
         PlayersPassing = new();
@@ -81,11 +78,13 @@ public class TurnManager : NetworkBehaviour
         {
             DiscardTF.GetComponent<Image>().raycastTarget = true;
         }
-        else if (GManager.PlayerDict[GManager.DealerID] == PlayerRef.None)
+        else if (GManager.PlayerDict[GManager.DealerID] == PlayerRef.None && Runner.IsServer)
         {
             H_AITurn(GManager.Racks[GManager.DealerID].Last().GetComponent<Tile>().ID);
         }
     }
+
+    // FIXME: call wait buttons don't show on client and also the turn doesn't seem to increment when there's a client
 
     // Client discards a tile
     public void C_Discard(int discardTileID)
@@ -113,7 +112,7 @@ public class TurnManager : NetworkBehaviour
         if (!Tile.IsJoker(discardTileID))
         {
             WaitingForCallers = true;
-            CallWaitButtons.SetActive(true);
+            RPC_H2A_ShowButtons(discardPlayerID);
         }
         else { StartCoroutine(WaitForJoker()); }
         //StartCoroutine(WaitForCallers());
@@ -133,11 +132,28 @@ public class TurnManager : NetworkBehaviour
                    .raycastTarget = false;
     }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    void RPC_H2A_ShowButtons(int discardPlayerID)
+    {
+        C_ShowButtons(discardPlayerID);
+    }
+
+    void C_ShowButtons(int discardPlayerID)
+    {
+        if (Runner.LocalPlayer != GManager.PlayerDict[discardPlayerID])
+        { CallWaitButtons.SetActive(true); }
+    }
+
     private bool WaitingForPlayer = false;
     private float timer = 0f;
 
+    //FIXME: wait isn't being respected
+    int counter = 0;
+
     public override void FixedUpdateNetwork()
     {
+        // this if statement rules out time when we're not waiting for a tile to be called
+        // but ALSO excludes clients because clients never have WaitingForCallers = true
         if (!WaitingForCallers) { return; }
 
         foreach ((int playerID, InputCollection playerInput) in GManager.InputDict)
@@ -149,33 +165,49 @@ public class TurnManager : NetworkBehaviour
 
         if (!WaitingForPlayer)
         {
+            counter++;
             timer += Time.deltaTime;
+            Debug.Log($"{counter}: {timer}");
 
             // Check for specific inputs here
             if (AnyPlayerWaiting)
             {
-                WaitButton.SetActive(false);
-                PassButton.SetActive(true);
                 WaitingForPlayer = true;
             }
             else if (AnyPlayerCalling) { Call(); }
-            else if (timer >= 2f) { Pass(); }
+            else if (timer >= 2f)
+            {
+                counter = 0;
+                Pass();
+            }
         }
         else
         {
+            
             if (AnyPlayerPassing) { Pass(); }
             else if (AnyPlayerCalling) { Call(); }
         }
+        // worked on standalone while debugging, but not when not debugging??
     }
 
     // TODO: when calling, the tile should go to public rack
+    // TODO: if called, other clients should see the tile go to otherracks
 
     // TODO: if a joker is discarded it can't be called
     // TODO: implement validation on calling
 
     void Call()
     {
-        TurnPlayerID = Runner.LocalPlayer.PlayerId;
+        // going to make this so that only the first person who calls gets it.
+        // TODO: add support for multiple people calling and giving to the next closest player turnwise
+        foreach ((int playerID, bool calling) in PlayersCalling)
+        {
+            if (calling)
+            {
+                TurnPlayerID = playerID;
+                break;
+            }
+        }
         H_CallTurn();
     }
 
@@ -188,6 +220,7 @@ public class TurnManager : NetworkBehaviour
     IEnumerator WaitForJoker()
     {
         yield return new WaitForSeconds(2);
+        TurnPlayerID = (TurnPlayerID + 1) % 4;
         H_NextTurn();
     }
 
@@ -204,8 +237,12 @@ public class TurnManager : NetworkBehaviour
             H_AITurn(nextTileID);
             return;
         }
+        TickTimer.CreateFromTicks(Runner, 1);
         RPC_H2C_NextTurn(nextPlayer, nextTileID);         // if it's a person, hand it over to that client
     }
+
+    // FIXME: if two players wait and one passes, the game continues and the other still sees buttons
+    // FIXME: rpc is acting very strange and inconsistent when called from build
 
     void H_CallTurn()
     {
@@ -220,7 +257,6 @@ public class TurnManager : NetworkBehaviour
 
     PlayerRef InitializeNextTurn()
     {
-        //ESystem.SetSelectedGameObject(null);
         WaitButton.SetActive(true);
         PassButton.SetActive(false);
         WaitingForCallers = false;
@@ -291,7 +327,6 @@ public class TurnManager : NetworkBehaviour
     void UpdateCurrentPlayer()
     {
         TurnIndicatorText.SetText($"It's player {TurnPlayerID}'s turn.");
-        NO.AssignInputAuthority(GManager.PlayerDict[TurnPlayerID]);
     }
 
     // TODO: this class is huuuuge
