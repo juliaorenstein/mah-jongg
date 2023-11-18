@@ -22,6 +22,9 @@ public class TurnManager : NetworkBehaviour
     private NetworkObject NO;
     public string ExposeTileName;
 
+    //private bool WaitingForPlayer = false;
+    private TickTimer timer;
+
     private Dictionary<int,bool> PlayersWaiting;
     private bool AnyPlayerWaiting
     { get { return PlayersWaiting.Values.Any(val => val); } }
@@ -112,6 +115,7 @@ public class TurnManager : NetworkBehaviour
         if (!Tile.IsJoker(discardTileID))
         {
             WaitingForCallers = true;
+            timer = TickTimer.CreateFromSeconds(Runner, 2f);
             RPC_H2A_ShowButtons(discardPlayerID);
         }
         else { StartCoroutine(WaitForJoker()); }
@@ -144,11 +148,8 @@ public class TurnManager : NetworkBehaviour
         { CallWaitButtons.SetActive(true); }
     }
 
-    private bool WaitingForPlayer = false;
-    private float timer = 0f;
 
-    //FIXME: wait isn't being respected
-    int counter = 0;
+    //FIXME: wait isn't being respected in standalone
 
     public override void FixedUpdateNetwork()
     {
@@ -163,31 +164,17 @@ public class TurnManager : NetworkBehaviour
             PlayersCalling[playerID] = playerInput.call;
         }
 
-        if (!WaitingForPlayer)
+        if (timer.IsRunning)
         {
-            counter++;
-            timer += Time.deltaTime;
-            Debug.Log($"{counter}: {timer}");
-
-            // Check for specific inputs here
-            if (AnyPlayerWaiting)
-            {
-                WaitingForPlayer = true;
-            }
+            if (AnyPlayerWaiting) { timer = TickTimer.None; }
             else if (AnyPlayerCalling) { Call(); }
-            else if (timer >= 2f)
-            {
-                counter = 0;
-                Pass();
-            }
+            else if (timer.Expired(Runner)) { Pass(); }
         }
         else
         {
-            
             if (AnyPlayerPassing) { Pass(); }
             else if (AnyPlayerCalling) { Call(); }
         }
-        // worked on standalone while debugging, but not when not debugging??
     }
 
     // TODO: when calling, the tile should go to public rack
@@ -237,7 +224,6 @@ public class TurnManager : NetworkBehaviour
             H_AITurn(nextTileID);
             return;
         }
-        TickTimer.CreateFromTicks(Runner, 1);
         RPC_H2C_NextTurn(nextPlayer, nextTileID);         // if it's a person, hand it over to that client
     }
 
@@ -260,9 +246,9 @@ public class TurnManager : NetworkBehaviour
         WaitButton.SetActive(true);
         PassButton.SetActive(false);
         WaitingForCallers = false;
-        WaitingForPlayer = false;
+        //WaitingForPlayer = false;
         CallWaitButtons.SetActive(false);
-        timer = 0f;
+        //timer = 0f;
 
         UpdateCurrentPlayer();
         return GManager.PlayerDict[TurnPlayerID];   // set next player

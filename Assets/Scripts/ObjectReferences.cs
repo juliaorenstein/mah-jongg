@@ -11,7 +11,7 @@ public class ObjectReferences : MonoBehaviour
     public TurnManager TurnManager;
     public EventSystem EventSystem;
     public NetworkCallbacks NetworkCallbacks;
-    public GameObject Runner;
+    public NetworkRunner Runner;
     public GameObject DealMe;
     public GameObject Board;
     public GameObject TilePool;

@@ -79,11 +79,6 @@ public class NetworkCallbacks : MonoBehaviour
 
     private void Update()
     {
-        // reset
-        inputStruct.turnOptions.Set(TurnButtons.wait, false);
-        inputStruct.turnOptions.Set(TurnButtons.pass, false);
-        inputStruct.turnOptions.Set(TurnButtons.call, false);
-
         // set
         if ((Input.GetKeyDown(KeyCode.Space)
             && WaitButton.activeInHierarchy)
@@ -92,6 +87,7 @@ public class NetworkCallbacks : MonoBehaviour
             inputStruct.turnOptions.Set(TurnButtons.wait, true);
             WaitButton.SetActive(false);
             PassButton.SetActive(true);
+            Debug.Log("Wait input");
         }
 
         else if ((Input.GetKeyDown(KeyCode.Space)
@@ -102,6 +98,7 @@ public class NetworkCallbacks : MonoBehaviour
             PassButton.SetActive(false);
             WaitButton.SetActive(true);
             ButtonsTF.gameObject.SetActive(false);
+            Debug.Log("Pass input");
         }
 
         else if ((Input.GetKeyDown(KeyCode.Return)
@@ -118,6 +115,9 @@ public class NetworkCallbacks : MonoBehaviour
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         input.Set(inputStruct);
+        if (inputStruct.turnOptions.IsSet(TurnButtons.wait)) Debug.Log("Wait set");
+        if (inputStruct.turnOptions.IsSet(TurnButtons.pass)) Debug.Log("Pass set");
+        inputStruct = default;
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }

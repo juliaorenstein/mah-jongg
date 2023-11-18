@@ -9,13 +9,11 @@ public class DealClient : MonoBehaviour
 {
     public ObjectReferences Refs;
     private Setup Setup;
-    private NetworkRunner NRunner;
     public PlayerRef Player;
 
     private void Awake()
     {
         Setup = Refs.Managers.GetComponent<Setup>();
-        NRunner = Refs.Runner.GetComponent<NetworkRunner>();
     }
 
     public void OnPointerClick(PointerEventData eventData)
