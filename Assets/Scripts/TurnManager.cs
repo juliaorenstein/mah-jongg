@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System;
 using UnityEngine.Windows;
 
 public class TurnManager : NetworkBehaviour
@@ -22,22 +23,15 @@ public class TurnManager : NetworkBehaviour
     private NetworkObject NO;
     public string ExposeTileName;
 
-    //private bool WaitingForPlayer = false;
     private TickTimer timer;
 
-    private Dictionary<int,bool> PlayersWaiting;
+    private List<int> PlayersWaiting;
     private bool AnyPlayerWaiting
-    { get { return PlayersWaiting.Values.Any(val => val); } }
+    { get { return PlayersWaiting.Count > 0; } }
 
-    private Dictionary<int, bool> PlayersPassing;
-    private bool AnyPlayerPassing
-    { get { return PlayersPassing.Values.Any(val => val); } }
-
-    private Dictionary<int, bool> PlayersCalling;
+    private List<int> PlayersCalling;
     private bool AnyPlayerCalling
-    { get { return PlayersCalling.Values.Any(val => val); } }
-
-    private bool WaitingForCallers;
+    { get { return PlayersCalling.Count > 0; } }
 
     [Networked]
     public int TurnPlayerID { get; set; }
@@ -62,20 +56,12 @@ public class TurnManager : NetworkBehaviour
         PassButton = CallWaitButtons.transform.GetChild(1).gameObject;
 
         PlayersWaiting = new();
-        PlayersPassing = new();
         PlayersCalling = new();
     }
 
     // Setup first turn
     public void C_StartGamePlay()
     {
-        foreach (int playerID in GManager.InputDict.Keys)
-        {
-            PlayersWaiting[playerID] = false;
-            PlayersPassing[playerID] = false;
-            PlayersCalling[playerID] = false;
-        }
-
         DiscardTF.gameObject.SetActive(true);
         if (GManager.DealerID == GManager.LocalPlayerID)
         {
@@ -114,7 +100,6 @@ public class TurnManager : NetworkBehaviour
         // wait for callers
         if (!Tile.IsJoker(discardTileID))
         {
-            WaitingForCallers = true;
             timer = TickTimer.CreateFromSeconds(Runner, 2f);
             RPC_H2A_ShowButtons(discardPlayerID);
         }
@@ -144,37 +129,41 @@ public class TurnManager : NetworkBehaviour
 
     void C_ShowButtons(int discardPlayerID)
     {
-        if (Runner.LocalPlayer != GManager.PlayerDict[discardPlayerID])
+        if (Runner.LocalPlayer.PlayerId != discardPlayerID)
         { CallWaitButtons.SetActive(true); }
+
+        // TODO: verify that this is working on clients now
     }
-
-
-    //FIXME: wait isn't being respected in standalone
 
     public override void FixedUpdateNetwork()
     {
-        // this if statement rules out time when we're not waiting for a tile to be called
-        // but ALSO excludes clients because clients never have WaitingForCallers = true
-        if (!WaitingForCallers) { return; }
+        // this check rules out times when players aren't calling
+        // but also clients because they never have a timer set
+        if (!timer.IsRunning) { return; }
 
         foreach ((int playerID, InputCollection playerInput) in GManager.InputDict)
         {
-            PlayersWaiting[playerID] = playerInput.wait;
-            PlayersPassing[playerID] = playerInput.pass;
-            PlayersCalling[playerID] = playerInput.call;
+            if (playerInput.wait) { PlayersWaiting.Add(playerID); }
+            if (playerInput.pass) { PlayersWaiting.Remove(playerID); }
+            if (playerInput.call)
+            {
+                PlayersWaiting.Remove(playerID);
+                PlayersCalling.Add(playerID);
+            }
         }
 
-        if (timer.IsRunning)
+        if (AnyPlayerWaiting) { return; }                           // if any player says wait, don't do anything
+        else if (AnyPlayerCalling && timer.Expired(Runner))         // if any players call and timer is done/not running, do logic
         {
-            if (AnyPlayerWaiting) { timer = TickTimer.None; }
-            else if (AnyPlayerCalling) { Call(); }
-            else if (timer.Expired(Runner)) { Pass(); }
+            // get the next player after current player
+            // this prev. used modulus but didn't work bc neg numbers
+            TurnPlayerID = PlayersCalling.Select(
+                playerID => playerID - TurnPlayerID - 4 *
+                (int)Math.Floor((float)(playerID - TurnPlayerID) / 4)
+                ).Min();
+            Call();
         }
-        else
-        {
-            if (AnyPlayerPassing) { Pass(); }
-            else if (AnyPlayerCalling) { Call(); }
-        }
+        else if (timer.Expired(Runner)) { Pass(); }                 // if nobody waited/called after 2s, pass
     }
 
     // TODO: when calling, the tile should go to public rack
@@ -183,20 +172,9 @@ public class TurnManager : NetworkBehaviour
     // TODO: if a joker is discarded it can't be called
     // TODO: implement validation on calling
 
-    void Call()
-    {
-        // going to make this so that only the first person who calls gets it.
-        // TODO: add support for multiple people calling and giving to the next closest player turnwise
-        foreach ((int playerID, bool calling) in PlayersCalling)
-        {
-            if (calling)
-            {
-                TurnPlayerID = playerID;
-                break;
-            }
-        }
-        H_CallTurn();
-    }
+    // FIXME: wait call buttons don't go away on clients for next turn
+
+    void Call() { H_CallTurn(); } // silly
 
     void Pass()
     {
@@ -213,7 +191,7 @@ public class TurnManager : NetworkBehaviour
 
     void H_NextTurn()
     {
-        PlayerRef nextPlayer = InitializeNextTurn();
+        PlayerRef nextPlayer = H_InitializeNextTurn();
         GameObject nextTile = GManager.Wall.Pop();
         nextTile.GetComponentInChildren<Image>().raycastTarget = true;
         
@@ -232,7 +210,7 @@ public class TurnManager : NetworkBehaviour
 
     void H_CallTurn()
     {
-        PlayerRef callPlayer = InitializeNextTurn();
+        PlayerRef callPlayer = H_InitializeNextTurn();
         GameObject callTile = DiscardTF.GetChild(DiscardTF.childCount - 1).gameObject;
 
         GManager.Racks[TurnPlayerID].Add(callTile); // TODO: track public tiles separately
@@ -241,17 +219,24 @@ public class TurnManager : NetworkBehaviour
         RPC_H2C_CallTurn(callPlayer, callTileID);
     }
 
-    PlayerRef InitializeNextTurn()
+    PlayerRef H_InitializeNextTurn()
     {
+        timer = TickTimer.None;
+        PlayersWaiting.Clear(); // this shouldn't be needed
+        PlayersCalling.Clear();
+        RPC_H2A_ResetButtons();
+        return GManager.PlayerDict[TurnPlayerID];   // set next player
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    void RPC_H2A_ResetButtons() { C_ResetButtons(); }
+
+    void C_ResetButtons()
+    {
+        TurnIndicatorText.SetText($"It's player {TurnPlayerID}'s turn.");
         WaitButton.SetActive(true);
         PassButton.SetActive(false);
-        WaitingForCallers = false;
-        //WaitingForPlayer = false;
         CallWaitButtons.SetActive(false);
-        //timer = 0f;
-
-        UpdateCurrentPlayer();
-        return GManager.PlayerDict[TurnPlayerID];   // set next player
     }
 
     // TODO: test network input, then implement into calling mechanism
@@ -308,11 +293,6 @@ public class TurnManager : NetworkBehaviour
         GameManager.TileList[tileID].transform
                    .GetComponentInChildren<TileLocomotion>()
                    .MoveTile(destination);
-    }
-
-    void UpdateCurrentPlayer()
-    {
-        TurnIndicatorText.SetText($"It's player {TurnPlayerID}'s turn.");
     }
 
     // TODO: this class is huuuuge
