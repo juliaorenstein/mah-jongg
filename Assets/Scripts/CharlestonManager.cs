@@ -4,11 +4,11 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using UnityEngine.Networking.Types;
+using static Unity.VisualScripting.Member;
 
 public class CharlestonManager : NetworkBehaviour
 {
-
-    // everyone
     public ObjectReferences Refs;
     public Transform CharlestonTF;
     public Transform CharlestonBoxTF;
@@ -17,9 +17,31 @@ public class CharlestonManager : NetworkBehaviour
     private GameManager GManager;
     private Transform RackPrivateTF;
     private Transform TilePoolTF;
-    private int[][] PassArr = new int[4][];
+    //private int[][] PassArr = new int[4][];
+    private List<List<int>> PassArr = new() { new(), new(), new(), new() };
+    private List<int> OptList = new List<int>() { 2, 5, 6 };
 
+    [Networked] private bool Opt { get; set; }
     [Networked] public int Counter { get; set; }
+
+    public string Direction()
+    {
+        return Direction(Counter);
+    }
+
+    public string Direction(int counter)
+    {
+        return counter switch
+        {
+            // first right
+            0 or 5 => "Right",
+            // first across
+            1 or 4 or 6 => "Across",
+            // first left
+            2 or 3 => "Left",
+            _ => "Done",
+        };
+    }
 
     // host
     private int PlayersReady = 0;
@@ -35,6 +57,7 @@ public class CharlestonManager : NetworkBehaviour
         GManager = Refs.Managers.GetComponent<GameManager>();
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         TilePoolTF = Refs.TilePool.transform;
+        Opt = false;
     }
 
     // FIXME: first, second, and fifth (??) passes are not smooth
@@ -47,15 +70,15 @@ public class CharlestonManager : NetworkBehaviour
 
         foreach (Transform chSpot in CharlestonBoxTF)
         {
-            // check all spots are populated
+            // check if the spot is populated
             if (chSpot.childCount == 0)
             {
-                ready = false;
-                // don't break because we still want to check for jokers
+                if (!Opt) { ready = false; } // if it's an optional pass, we are ready whenev
+                continue;
             }
 
-            // check that there are no jokers
-            else if (chSpot.GetChild(0).name == "Joker")
+            // if populated, check that there are no jokers
+            if (chSpot.GetChild(0).name == "Joker")
             {
                 jokers = true;
                 ready = false;
@@ -74,21 +97,27 @@ public class CharlestonManager : NetworkBehaviour
     public void C_StartPass()
     {
         Transform tileTF;
+        Transform chSpotTF;
 
         // collect the tiles to pass from the Charleston box
         // and move the tiles off screen
-        int[] tileIDsToPass = new int[3];
+        //int[] tileIDsToPass = new int[3] {-1, -1, -1};
+        List<int> tileIDsToPass = new();
         for (int i = 0; i < 3; i++)
         {
-            tileTF = CharlestonBoxTF.GetChild(i).GetChild(0);
-            tileTF.GetChild(0).GetComponent<TileLocomotion>().MoveTile(TilePoolTF);
-            tileIDsToPass[i] = tileTF.GetComponent<Tile>().ID;
+            chSpotTF = CharlestonBoxTF.GetChild(i);
+            if (chSpotTF.childCount > 0)
+            {
+                tileTF = chSpotTF.GetChild(0);
+                tileTF.GetChild(0).GetComponent<TileLocomotion>().MoveTile(TilePoolTF);
+                tileIDsToPass.Add(tileTF.GetComponent<Tile>().ID);
+            }
         }
 
         // give the tiles to the host
         //if (GManager.Offline) { H_StartPass(3, tileIDsToPass); }
         //else { RPC_C2H_StartPass(tileIDsToPass); }
-        RPC_C2H_StartPass(tileIDsToPass);
+        RPC_C2H_StartPass(tileIDsToPass.ToArray());
         // prep for next pass
 
     }
@@ -114,7 +143,7 @@ public class CharlestonManager : NetworkBehaviour
         }
 
         // update pass array
-        PassArr[sourcePlayerId] = tileIDsToPass;
+        PassArr[sourcePlayerId] = tileIDsToPass.ToList();
         PlayersReady += 1;
         if (PlayersReady == 4) { H_Pass(); }
     }
@@ -127,7 +156,7 @@ public class CharlestonManager : NetworkBehaviour
         {
             PassArr[playerID] = aiRack.GetRange(aiRack.Count - 3, 3)
                                       .Select(tile => tile.GetComponent<Tile>().ID)
-                                      .ToArray();
+                                      .ToList();
         }
         PlayersReady++;
     }
@@ -136,10 +165,51 @@ public class CharlestonManager : NetworkBehaviour
     void H_Pass()
     {
         int targetID;
-        PlayerRef targetPlayerRef;
-        int[] tileIDsToSend;
-        Counter++;
+        List<int> WaitingForTilesList = PassArr.Select(list => list.Count).ToList();
+        List<List<int>> RecArr = new() { new(), new(), new(), new() };
 
+        // first remove things from racklists (and set up RecArr while we're at it)
+        for (int sourceID = 0; sourceID < 4; sourceID++)
+        {
+            PassArr[sourceID].ForEach(tileID =>
+                GManager.Racks[sourceID].Remove(GameManager.TileList[tileID]));
+        }
+
+        // now rearrange everything
+        while (PassArr.Any(subArr => subArr.Any()))
+        {
+            for (int sourceID = 0; sourceID < 4; sourceID++)
+            {
+                targetID = PassTargetID(sourceID, Direction());
+                foreach (int tileID in PassArr[sourceID])
+                {
+                    if (RecArr[targetID].Count < WaitingForTilesList[targetID])
+                    {
+                        RecArr[targetID].Add(tileID);
+                    }
+                    else { PassArr[targetID].Add(tileID); }
+                }
+                PassArr[sourceID].Clear();
+            }
+        }
+
+        // TODO: update racklist management to refer to ints, not gameobjects
+
+        // now update racklists again and send to clients
+        for (targetID = 0; targetID < 4; targetID++)
+        {
+            RecArr[targetID].ForEach(tileID =>
+                GManager.Racks[targetID].Add(GameManager.TileList[tileID]));
+
+            if (GManager.PlayerDict[targetID] != PlayerRef.None) // prevent host from receiving all the AI tiles
+            {
+                RPC_H2C_SendTiles(GManager.PlayerDict[targetID], RecArr[targetID].ToArray());
+                RecArr[targetID].Clear();
+            }
+
+        }
+
+        /*
         for (int sourceID = 0; sourceID < 4; sourceID++)
         {
             targetID = PassTargetID(sourceID, Direction());
@@ -149,10 +219,14 @@ public class CharlestonManager : NetworkBehaviour
             // update the lists
             foreach (int tileID in tileIDsToSend)
             {
-                // remove from source
-                GManager.Racks[sourceID].Remove(GameManager.TileList[tileID]);
-                // add to target
-                GManager.Racks[targetID].Add(GameManager.TileList[tileID]);
+                if (tileID > -1)
+                {
+                    // remove from source
+                    GManager.Racks[sourceID].Remove(GameManager.TileList[tileID]);
+
+                    // add to target
+                    GManager.Racks[targetID].Add(GameManager.TileList[tileID]);
+                }
             }
 
             // send to client
@@ -161,31 +235,17 @@ public class CharlestonManager : NetworkBehaviour
                 RPC_H2C_SendTiles(targetPlayerRef, tileIDsToSend);
             }
         }
+        */
 
         // prep for next pass
-        Array.Clear(PassArr, 0, PassArr.Length);
         PlayersReady = 0;
+        Counter++;
+        if (OptList.Contains(Counter)) { Opt = true; }
+        else { Opt = false; }
     }
 
-    // helper function to determine what direction to pass
-    public string Direction()
-    {
-        switch (Counter)
-        {
-            case 0:         // first right
-            case 5:         // second right
-                return "Right";
-            case 1:         // first across
-            case 4:         // second across
-            case 6:         // optional
-                return "Across";
-            case 2:         // first left
-            case 3:         // second left
-                return "Left";
-            default:
-                return "Done";
-        }
-    }
+    
+    
 
     // helper function to determine the target of the pass
     int PassTargetID(int sourceID, string direction)
@@ -210,7 +270,7 @@ public class CharlestonManager : NetworkBehaviour
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
-    void RPC_H2C_SendTiles([RpcTarget] PlayerRef player, int[] tileIDsToSend)
+    void RPC_H2C_SendTiles([RpcTarget] PlayerRef _, int[] tileIDsToSend)
     {
         { C_ReceiveTiles(tileIDsToSend); }
     }
@@ -220,6 +280,6 @@ public class CharlestonManager : NetworkBehaviour
         foreach (int tileID in tileIDsToReceive)
         { TileLocomotion.MoveTile(tileID, RackPrivateTF); }
 
-        PassButton.GetComponent<CharlestonPassButton>().UpdateButton();
+        PassButton.GetComponent<CharlestonPassButton>().UpdateButton(Counter + 1);
     }
 }

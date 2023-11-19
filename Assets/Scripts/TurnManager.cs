@@ -49,7 +49,6 @@ public class TurnManager : NetworkBehaviour
                                 .GetComponent<TextMeshProUGUI>();
         NO = GetComponent<NetworkObject>();
         TurnPlayerID = GManager.DealerID;
-        UpdateCurrentPlayer();
         CallWaitButtons = Refs.CallWaitButtons;
 
         WaitButton = CallWaitButtons.transform.GetChild(0).gameObject;

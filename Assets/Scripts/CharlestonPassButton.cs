@@ -62,7 +62,7 @@ public class CharlestonPassButton : MonoBehaviour
         Button.interactable = false;
 
         // set the direction text
-        Text.SetText($"Pass {CManager.Direction()}");
+        Text.SetText($"Pass {CManager.Direction(counter)}");
     }
 
     public void NoJokers()
