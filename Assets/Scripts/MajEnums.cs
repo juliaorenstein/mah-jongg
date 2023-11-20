@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ValRelation
+public enum Pattern
 {
     exact,
     like,
@@ -28,8 +28,8 @@ public enum Suit
 
 public enum Col
 {
-    red,
     green,
+    red,
     blue
 }
 
