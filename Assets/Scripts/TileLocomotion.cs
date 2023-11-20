@@ -66,7 +66,7 @@ public class TileLocomotion : MonoBehaviour
         }
     }
 
-    private void DoubleClickCharleston()
+    public void DoubleClickCharleston()
     {
         if (transform.IsChildOf(RackPrivateTF))
         {

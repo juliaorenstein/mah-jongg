@@ -4,8 +4,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using UnityEngine.Networking.Types;
-using static Unity.VisualScripting.Member;
 
 public class CharlestonManager : NetworkBehaviour
 {
@@ -19,7 +17,9 @@ public class CharlestonManager : NetworkBehaviour
     private Transform TilePoolTF;
     //private int[][] PassArr = new int[4][];
     private List<List<int>> PassArr = new() { new(), new(), new(), new() };
-    private List<int> OptList = new List<int>() { 2, 5, 6 };
+    private List<List<int>> RecArr = new() { new(), new(), new(), new() };
+    private readonly List<int> StealList = new List<int>() { 2, 5 };
+    private readonly int OptPass = 6;
 
     [Networked] private bool Opt { get; set; }
     [Networked] public int Counter { get; set; }
@@ -35,8 +35,8 @@ public class CharlestonManager : NetworkBehaviour
         {
             // first right
             0 or 5 => "Right",
-            // first across
-            1 or 4 or 6 => "Across",
+            // first over
+            1 or 4 or 6 => "Over",
             // first left
             2 or 3 => "Left",
             _ => "Done",
@@ -101,7 +101,6 @@ public class CharlestonManager : NetworkBehaviour
 
         // collect the tiles to pass from the Charleston box
         // and move the tiles off screen
-        //int[] tileIDsToPass = new int[3] {-1, -1, -1};
         List<int> tileIDsToPass = new();
         for (int i = 0; i < 3; i++)
         {
@@ -115,11 +114,7 @@ public class CharlestonManager : NetworkBehaviour
         }
 
         // give the tiles to the host
-        //if (GManager.Offline) { H_StartPass(3, tileIDsToPass); }
-        //else { RPC_C2H_StartPass(tileIDsToPass); }
         RPC_C2H_StartPass(tileIDsToPass.ToArray());
-        // prep for next pass
-
     }
 
     // send tiles from Client to Host
@@ -164,10 +159,35 @@ public class CharlestonManager : NetworkBehaviour
     // host does all the pass logic and reveals new tiles to players
     void H_Pass()
     {
+        if (Counter != OptPass) { PassLogic(); }
+        else { OptPassLogic(); }
+
+        // TODO: update racklist management to refer to ints, not gameobjects
+
+        // now update racklists again and send to clients
+        for (int targetID = 0; targetID < 4; targetID++)
+        {
+            RecArr[targetID].ForEach(tileID =>
+                GManager.Racks[targetID].Add(GameManager.TileList[tileID]));
+
+            if (GManager.PlayerDict[targetID] != PlayerRef.None) // prevent host from receiving all the AI tiles
+            {
+                RPC_H2C_SendTiles(GManager.PlayerDict[targetID], RecArr[targetID].ToArray());
+                RecArr[targetID].Clear();
+            }
+        }
+
+        // prep for next pass
+        PlayersReady = 0;
+        Counter++;
+        if (StealList.Contains(Counter)) { Opt = true; }
+        else { Opt = false; }
+    }
+
+    void PassLogic()
+    {
         int targetID;
         List<int> WaitingForTilesList = PassArr.Select(list => list.Count).ToList();
-        List<List<int>> RecArr = new() { new(), new(), new(), new() };
-
         // first remove things from racklists (and set up RecArr while we're at it)
         for (int sourceID = 0; sourceID < 4; sourceID++)
         {
@@ -192,60 +212,26 @@ public class CharlestonManager : NetworkBehaviour
                 PassArr[sourceID].Clear();
             }
         }
-
-        // TODO: update racklist management to refer to ints, not gameobjects
-
-        // now update racklists again and send to clients
-        for (targetID = 0; targetID < 4; targetID++)
-        {
-            RecArr[targetID].ForEach(tileID =>
-                GManager.Racks[targetID].Add(GameManager.TileList[tileID]));
-
-            if (GManager.PlayerDict[targetID] != PlayerRef.None) // prevent host from receiving all the AI tiles
-            {
-                RPC_H2C_SendTiles(GManager.PlayerDict[targetID], RecArr[targetID].ToArray());
-                RecArr[targetID].Clear();
-            }
-
-        }
-
-        /*
-        for (int sourceID = 0; sourceID < 4; sourceID++)
-        {
-            targetID = PassTargetID(sourceID, Direction());
-            targetPlayerRef = GManager.PlayerDict[targetID];
-            tileIDsToSend = PassArr[sourceID];
-
-            // update the lists
-            foreach (int tileID in tileIDsToSend)
-            {
-                if (tileID > -1)
-                {
-                    // remove from source
-                    GManager.Racks[sourceID].Remove(GameManager.TileList[tileID]);
-
-                    // add to target
-                    GManager.Racks[targetID].Add(GameManager.TileList[tileID]);
-                }
-            }
-
-            // send to client
-            if (targetPlayerRef != PlayerRef.None) // prevent host from receiving all the AI tiles
-            {
-                RPC_H2C_SendTiles(targetPlayerRef, tileIDsToSend);
-            }
-        }
-        */
-
-        // prep for next pass
-        PlayersReady = 0;
-        Counter++;
-        if (OptList.Contains(Counter)) { Opt = true; }
-        else { Opt = false; }
     }
 
-    
-    
+    void OptPassLogic()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            int countA = PassArr[i].Count;
+            int countB = PassArr[i + 2].Count;
+
+            if (countA != countB)
+            {
+                RecArr[i] = PassArr[i + 2];
+                RecArr[i + 2] = PassArr[i];
+            }
+            else
+            {
+                // TODO: implement functionality for when optional pass is not the same number
+            }
+        }
+    }
 
     // helper function to determine the target of the pass
     int PassTargetID(int sourceID, string direction)
@@ -257,13 +243,13 @@ public class CharlestonManager : NetworkBehaviour
         switch (direction)
         {
             case "Right":
-                shift = 1;
+                shift = 3;
                 break;
-            case "Across":
+            case "Over":
                 shift = 2;
                 break;
             default:
-                shift = 3;
+                shift = 1;
                 break;
         }
         return (sourceID + shift) % 4;

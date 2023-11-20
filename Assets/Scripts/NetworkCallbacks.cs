@@ -87,7 +87,7 @@ public class NetworkCallbacks : MonoBehaviour
             inputStruct.turnOptions.Set(TurnButtons.wait, true);
             WaitButton.SetActive(false);
             PassButton.SetActive(true);
-            Debug.Log("Wait input");
+            ESystem.SetSelectedGameObject(null); // in if statement to avoid unselecting unrelated things
         }
 
         else if ((Input.GetKeyDown(KeyCode.Space)
@@ -98,7 +98,7 @@ public class NetworkCallbacks : MonoBehaviour
             PassButton.SetActive(false);
             WaitButton.SetActive(true);
             ButtonsTF.gameObject.SetActive(false);
-            Debug.Log("Pass input");
+            ESystem.SetSelectedGameObject(null);
         }
 
         else if ((Input.GetKeyDown(KeyCode.Return)
@@ -106,10 +106,8 @@ public class NetworkCallbacks : MonoBehaviour
             || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(2).gameObject)
         {
             inputStruct.turnOptions.Set(TurnButtons.call, true);
-            ButtonsTF.gameObject.SetActive(false);
+            ESystem.SetSelectedGameObject(null);
         }
-
-        ESystem.SetSelectedGameObject(null);
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)

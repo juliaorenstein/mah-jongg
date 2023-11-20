@@ -28,13 +28,16 @@ public class CharlestonPassButton : MonoBehaviour
     }
 
     public void OnPointerClick(PointerEventData eventData)
+    { InitiatePass(); }
+
+    public void InitiatePass()
     {
         if (Button.interactable)
         {
             Button.interactable = false;
             Text.SetText("Waiting for others");
             CManager.C_StartPass();
-        }
+        }      
     }
 
     public void UpdateButton() { UpdateButton(CManager.Counter); }

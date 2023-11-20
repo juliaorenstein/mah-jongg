@@ -150,16 +150,14 @@ public class TurnManager : NetworkBehaviour
                 PlayersCalling.Add(playerID);
             }
         }
-
+        
         if (AnyPlayerWaiting) { return; }                           // if any player says wait, don't do anything
         else if (AnyPlayerCalling && timer.Expired(Runner))         // if any players call and timer is done/not running, do logic
         {
-            // get the next player after current player
-            // this prev. used modulus but didn't work bc neg numbers
-            TurnPlayerID = PlayersCalling.Select(
-                playerID => playerID - TurnPlayerID - 4 *
-                (int)Math.Floor((float)(playerID - TurnPlayerID) / 4)
-                ).Min();
+            int closestPlayerDelta = PlayersCalling.Select(
+                playerID => playerID - TurnPlayerID).Min();
+            TurnPlayerID += (closestPlayerDelta + 4) % 4;
+
             Call();
         }
         else if (timer.Expired(Runner)) { Pass(); }                 // if nobody waited/called after 2s, pass
