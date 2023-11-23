@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HandTester : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    /*
+     * public GameObject RackPrefab;
+    string HandStr = "FFFb 2222g FFFb 8888r exact x 25";
+    Go HandTest;
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        HandTest = new Go(HandStr);
+        Debug.Log(HandTest.ComboSetForOneHand().Count);
     }
+    */
 }

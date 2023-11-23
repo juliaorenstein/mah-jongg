@@ -97,7 +97,7 @@ public class TileLocomotion : MonoBehaviour
         // TODO: add drag expose tag
     }
 
-    void DoubleClickDiscard()
+    public void DoubleClickDiscard()
     {
         TManager.C_Discard(TileID);
     }

@@ -21,7 +21,7 @@ public class NetworkCallbacks : MonoBehaviour
     private GameObject WaitButton;
     private GameObject PassButton;
     private GameObject CallButton;
-    private CallInputStruct inputStruct = new();
+    public CallInputStruct inputStruct = new();
 
 
     private void Awake()
@@ -76,39 +76,6 @@ public class NetworkCallbacks : MonoBehaviour
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnDisconnectedFromServer(NetworkRunner runner) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-
-    private void Update()
-    {
-        // set
-        if ((Input.GetKeyDown(KeyCode.Space)
-            && WaitButton.activeInHierarchy)
-            || ESystem.currentSelectedGameObject == WaitButton)
-        {
-            inputStruct.turnOptions.Set(TurnButtons.wait, true);
-            WaitButton.SetActive(false);
-            PassButton.SetActive(true);
-            ESystem.SetSelectedGameObject(null); // in if statement to avoid unselecting unrelated things
-        }
-
-        else if ((Input.GetKeyDown(KeyCode.Space)
-            && PassButton.activeInHierarchy)
-            || ESystem.currentSelectedGameObject == PassButton)
-        {
-            inputStruct.turnOptions.Set(TurnButtons.pass, true);
-            PassButton.SetActive(false);
-            WaitButton.SetActive(true);
-            ButtonsTF.gameObject.SetActive(false);
-            ESystem.SetSelectedGameObject(null);
-        }
-
-        else if ((Input.GetKeyDown(KeyCode.Return)
-            && ButtonsTF.GetChild(2).gameObject.activeInHierarchy)
-            || ESystem.currentSelectedGameObject == ButtonsTF.GetChild(2).gameObject)
-        {
-            inputStruct.turnOptions.Set(TurnButtons.call, true);
-            ESystem.SetSelectedGameObject(null);
-        }
-    }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {

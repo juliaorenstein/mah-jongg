@@ -1,16 +1,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Text;
 using UnityEngine;
+using System.IO;
 
-public class Hand
+public class Hand : MonoBehaviour
 {
+    /*
     public Pattern pattern;
     public bool odd;    // mod on Pattern.like
     public bool even;   // mod on Pattern.like
     public List<Group> groups;
     public int value;
     public bool closed;
+    StringBuilder str = new();
+    static string filePath = "/Users/juliaorenstein/Unity/Maj/HandTester.txt";
+
+
+    public GameObject RackPrefab;
+    string HandStr = "FFFb 2222g FFFb 8888r exact x 25";
+
+    private void Start()
+    {
+        
+        
+    }
 
     // format:
     // each grouping is the chars / vals from the card,
@@ -27,29 +42,31 @@ public class Hand
     // combo: { 4, 15, 32 } - a list of integers representing tiles, or a part of a specific hand
     // comboSet: { comboA, comboB, comboC } - a set of combos, all permutations of a handful of tiles
     // comboSetList: { comboSetA, comboSetB, comboSetC } - a list of comboSets,
-        // where we need to find all possibilities of combos from each set joining with eachother
+    // where we need to find all possibilities of combos from each set joining with eachother
     // comboSetOptions: same structure as comboSetList, but this is a list of comboSets that are
-        // mutually exclusive - don't want to permutate them with each other
+    // mutually exclusive - don't want to permutate them with each other
 
-
-    public Hand(string handStr)
+    public static void Go()
     {
+        string handStr = "FFFb 2222g FFFb 8888r exact x 25";
         string[] handArr = handStr.Split(" ");
         string[] groupArr = handArr[0..^3];
 
-        groups = new();
-        pattern = (Pattern)Enum.Parse(typeof(Pattern), handArr[^3]);
-        closed = handArr[^2] == "c";
-        value = int.Parse(handArr[^1]);
+        Hand handTest = new();
+        handTest.groups = new();
+        handTest.pattern = (Pattern)Enum.Parse(typeof(Pattern), handArr[^3]);
+        handTest.closed = handArr[^2] == "c";
+        handTest.value = int.Parse(handArr[^1]);
 
-        foreach (string groupStr in handArr)
+        foreach (string groupStr in groupArr)
         {
-            groups.Add(Group.Create(groupStr));
+            handTest.groups.Add(Group.Create(groupStr));
         }
-    }
+
+        handTest.ComboSetForOneHand();
+    }  
     
-    
-    List<List<int>> ComboSetForOneHand()
+    public List<List<int>> ComboSetForOneHand()
     {
         List<List<int>> comboSetForHand = new();
         List<List<List<int>>> comboSetListForHand = new();
@@ -259,6 +276,15 @@ public class Hand
             }
             curLength++;
         }
+        foreach (List<int> list in lists)
+        {
+            str.Clear();
+            foreach (int i in list)
+            {
+                str.Append(i + ", ");
+            }
+            WriteToFile(str.ToString());
+        }
         return lists;
     }
 
@@ -321,7 +347,23 @@ public class Hand
         return output;
     }
 
+    void WriteToFile(string line)
+    {
+        
 
+        try
+        {
+            using (StreamWriter writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine(line);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("An error occurred: " + e.Message);
+        }
+    }
+    */
 }
 
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using System;
 
 public class Navigation : MonoBehaviour
@@ -10,6 +11,11 @@ public class Navigation : MonoBehaviour
     private Transform SelectedTF;
     private Transform Charleston;
     private CharlestonPassButton ChButton;
+    private GameObject DiscardTF;
+    private GameObject WaitButton;
+    private GameObject PassButton;
+    private GameObject CallButton;
+    private CallInputStruct inputStruct;
 
     private void Start()
     {
@@ -17,6 +23,11 @@ public class Navigation : MonoBehaviour
         Rack = Refs.LocalRack.transform.GetChild(1);
         Charleston = Refs.Charleston;
         ChButton = Charleston.GetComponentInChildren<CharlestonPassButton>();
+        DiscardTF = Refs.Discard;
+        WaitButton = Refs.CallWaitButtons.transform.GetChild(0).gameObject;
+        PassButton = Refs.CallWaitButtons.transform.GetChild(1).gameObject;
+        CallButton = Refs.CallWaitButtons.transform.GetChild(2).gameObject;
+        inputStruct = Refs.NetworkCallbacks.inputStruct;
     }
 
     private void Update()
@@ -26,8 +37,10 @@ public class Navigation : MonoBehaviour
             if (!SelectedTF)
             {
                 Select(Rack.GetChild(0));
+                return;
             }
-            else if (SelectedTF.IsChildOf(Rack))
+
+            if (SelectedTF.IsChildOf(Rack))
             {
                 int ix = SelectedTF.GetSiblingIndex() + 1;
                 if (ix == Rack.childCount) { ix = 0; }
@@ -36,8 +49,10 @@ public class Navigation : MonoBehaviour
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 { SelectedTF.SetSiblingIndex(ix); }
                 else { Select(Rack.GetChild(ix)); }
+                return;
             }
-            else if (SelectedTF.IsChildOf(Charleston))
+
+            if (SelectedTF.IsChildOf(Charleston))
             {
                 Tile SelectedTile = SelectedTF.GetComponent<Tile>();
                 Tile[] tilesInCharleston = Charleston.GetComponentsInChildren<Tile>();
@@ -45,7 +60,8 @@ public class Navigation : MonoBehaviour
                 {
                     int curIx = Array.IndexOf(tilesInCharleston, SelectedTile);
                     Select(tilesInCharleston[curIx + 1].transform);
-                }  
+                }
+                return;
             }
         }
 
@@ -54,8 +70,10 @@ public class Navigation : MonoBehaviour
             if (!SelectedTF)
             {
                 Select(Rack.GetChild(0));
+                return;
             }
-            else if (SelectedTF.IsChildOf(Rack))
+
+            if (SelectedTF.IsChildOf(Rack))
             {
                 int ix = SelectedTF.GetSiblingIndex() - 1;
                 if (ix < 0) { ix = Rack.childCount - 1; }
@@ -64,8 +82,10 @@ public class Navigation : MonoBehaviour
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 { SelectedTF.SetSiblingIndex(ix); }
                 else { Select(Rack.GetChild(ix)); }
+                return;
             }
-            else if (SelectedTF.IsChildOf(Charleston))
+
+            if (SelectedTF.IsChildOf(Charleston))
             {
                 Tile SelectedTile = SelectedTF.GetComponent<Tile>();
                 Tile[] tilesInCharleston = Charleston.GetComponentsInChildren<Tile>();
@@ -74,6 +94,7 @@ public class Navigation : MonoBehaviour
                     int curIx = Array.IndexOf(tilesInCharleston, SelectedTile);
                     Select(tilesInCharleston[curIx - 1].transform);
                 }
+                return;
             }
         }
 
@@ -83,29 +104,82 @@ public class Navigation : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.DownArrow) && SelectedTF && SelectedTF.IsChildOf(Charleston))
         {
             Select(Rack.GetChild(0));
+            return;
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && SelectedTF && SelectedTF.IsChildOf(Rack))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && SelectedTF
+            && SelectedTF.IsChildOf(Rack) && Charleston.gameObject.activeInHierarchy)
         {
             Tile charlestonTile = Charleston.GetComponentInChildren<Tile>();
             if (charlestonTile)
             {
                 Select(charlestonTile.transform);
+                return;
             }
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (SelectedTF && Charleston.gameObject.activeInHierarchy)
+            if (!SelectedTF) { return; }
+
+            if (Charleston.gameObject.activeInHierarchy)
             {
                 SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickCharleston();
+                return;
+            }
+
+            if (DiscardTF.GetComponentInChildren<Image>().raycastTarget)
+            {
+                Unselect();
+                SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickDiscard();
+                return;
+            }
+
+            if (WaitButton.activeInHierarchy)
+            {
+                InputWait();
+                return;
+            }
+
+            if (PassButton.activeInHierarchy)
+            {
+                InputPass();
+                return;
             }
         }
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            Unselect();
-            ChButton.InitiatePass();
+            if (Charleston.gameObject.activeInHierarchy)
+            {
+                Unselect();
+                ChButton.InitiatePass();
+                return;
+            }
+
+            if (CallButton.activeInHierarchy)
+            {
+                InputCall();
+                return;
+            }
+        }
+
+        if (ESystem.currentSelectedGameObject == WaitButton)
+        {
+            InputWait();
+            return;
+        }
+
+        if (ESystem.currentSelectedGameObject == PassButton)
+        {
+            InputPass();
+            return;
+        }
+
+        if (ESystem.currentSelectedGameObject == CallButton)
+        {
+            InputCall();
+            return;
         }
     }
 
@@ -128,5 +202,28 @@ public class Navigation : MonoBehaviour
         }
         ESystem.SetSelectedGameObject(null);
         SelectedTF = null;
+    }
+
+    void InputWait()
+    {
+        inputStruct.turnOptions.Set(TurnButtons.wait, true);
+        WaitButton.SetActive(false);
+        PassButton.SetActive(true);
+        Unselect(); // in if statement to avoid unselecting unrelated things
+    }
+
+    void InputPass()
+    {
+        inputStruct.turnOptions.Set(TurnButtons.pass, true);
+        PassButton.SetActive(false);
+        WaitButton.SetActive(true);
+        CallButton.transform.parent.gameObject.SetActive(false);
+        Unselect();
+    }
+
+    void InputCall()
+    {
+        inputStruct.turnOptions.Set(TurnButtons.call, true);
+        Unselect();
     }
 }
