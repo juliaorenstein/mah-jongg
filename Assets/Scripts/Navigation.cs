@@ -120,8 +120,6 @@ public class Navigation : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (!SelectedTF) { return; }
-
             if (Charleston.gameObject.activeInHierarchy)
             {
                 SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickCharleston();
@@ -144,6 +142,11 @@ public class Navigation : MonoBehaviour
             if (PassButton.activeInHierarchy)
             {
                 InputPass();
+                return;
+            }
+
+            if (!SelectedTF) {
+                Select(Rack.GetChild(0));
                 return;
             }
         }
@@ -181,6 +184,9 @@ public class Navigation : MonoBehaviour
             InputCall();
             return;
         }
+
+        // TODO: up/down between public/private rack
+        // TODO: space bar to expose
     }
 
     public void Select(Transform tileTF)

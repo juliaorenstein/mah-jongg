@@ -19,12 +19,15 @@ public class TileLocomotion : MonoBehaviour
     private EventSystem ESystem;
     public Transform TileTF;
     private Transform RackPrivateTF;
+    private Transform RackPublicTF;
+    private Transform OtherRacksTF;
     private Image TileImage;
     private Transform DraggingTF;
     private Transform CharlestonBoxTF;
     private Transform DiscardTF;
     private TurnManager TManager;
     private int TileID;
+    private List<Transform> RebuildLayoutTransforms;
 
     // lerp stuff
     bool Lerping = false;
@@ -41,16 +44,23 @@ public class TileLocomotion : MonoBehaviour
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();
         TileTF = transform.parent;
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
+        RackPublicTF = Refs.LocalRack.transform.GetChild(0);
+        OtherRacksTF = Refs.OtherRacks.transform;
         TileImage = GetComponent<Image>();
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
         TManager = Refs.Managers.GetComponent<TurnManager>();
+        RebuildLayoutTransforms = new() { DiscardTF, RackPrivateTF, RackPublicTF };
     }
 
     private void Start()
     {
         TileID = GetComponentInParent<Tile>().ID;
+        foreach ( Transform rack in OtherRacksTF )
+        {
+            RebuildLayoutTransforms.Add(rack.GetChild(0));
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -59,8 +69,7 @@ public class TileLocomotion : MonoBehaviour
         {
             if (CharlestonBoxTF.parent.gameObject.activeSelf)
             { DoubleClickCharleston(); }
-            else if (TManager.ExposeTileName == transform.parent.name
-                || (TManager.ExposeTileName != null && transform.parent.name == "Joker"))
+            else if (EligibleForExpose())
             { DoubleClickExpose(); }
             else if (DiscardTF.GetComponent<Image>().raycastTarget)
             { DoubleClickDiscard(); }
@@ -93,10 +102,7 @@ public class TileLocomotion : MonoBehaviour
     }
 
     void DoubleClickExpose()
-    {
-        TManager.C_Expose(TileID);
-        // TODO: add drag expose tag
-    }
+    { TManager.C_Expose(TileID); }
 
     public void DoubleClickDiscard()
     {
@@ -143,10 +149,9 @@ public class TileLocomotion : MonoBehaviour
         { TManager.C_Discard(TileID); }
 
         // expose
-        else if (raycastTFs.Contains(RackPrivateTF.parent.GetChild(0).transform))
-        {
-            TManager.C_Expose(TileID);
-        }
+        else if (raycastTFs.Contains(RackPrivateTF.parent.GetChild(0).transform)
+            && EligibleForExpose())
+        { TManager.C_Expose(TileID); }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }
@@ -201,6 +206,13 @@ public class TileLocomotion : MonoBehaviour
         MoveTile(charlestonSpotTF);
     }
 
+    bool EligibleForExpose()
+    {
+        return transform.IsChildOf(RackPrivateTF)
+            && (TManager.ExposeTileName == transform.parent.name
+            || (TManager.ExposeTileName != null && transform.parent.name == "Joker"));
+    }
+
     void MoveBack()
     {
         MoveTile(TileTF.parent, TileTF.GetSiblingIndex());
@@ -219,7 +231,7 @@ public class TileLocomotion : MonoBehaviour
         TileTF.SetSiblingIndex(newSibIx);
         TileTF.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 0);
 
-        if (newParentTF == RackPrivateTF || newParentTF == DiscardTF)
+        if (RebuildLayoutTransforms.Contains(newParentTF))
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)newParentTF);
             EndPos = TileTF.position;
@@ -235,6 +247,7 @@ public class TileLocomotion : MonoBehaviour
         // TODO: add racklist management?
         // FIXME: newly dealt tiles should lerp from somewhere
         // FIXME: when calling a tile it flashes briefly on rack before lerping
+        // FIXME: when a tile shows on display rack it's off by a little
     }
 
     // overload without a sibling index. sends tile to last spot

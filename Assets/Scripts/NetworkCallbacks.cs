@@ -80,8 +80,6 @@ public class NetworkCallbacks : MonoBehaviour
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         input.Set(inputStruct);
-        if (inputStruct.turnOptions.IsSet(TurnButtons.wait)) Debug.Log("Wait set");
-        if (inputStruct.turnOptions.IsSet(TurnButtons.pass)) Debug.Log("Pass set");
         inputStruct = default;
     }
 

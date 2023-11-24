@@ -16,7 +16,7 @@ public class TurnManager : NetworkBehaviour
     private GameManager GManager;
     private Transform DiscardTF;
     private Transform LocalRackTF;
-    private List<Transform> OtherRacksTFs;
+    private Transform OtherRacksBoxTF;
     private TextMeshProUGUI TurnIndicatorText;
     private GameObject CallWaitButtons;
     private GameObject WaitButton;
@@ -51,6 +51,7 @@ public class TurnManager : NetworkBehaviour
         NO = GetComponent<NetworkObject>();
         TurnPlayerID = GManager.DealerID;
         CallWaitButtons = Refs.CallWaitButtons;
+        OtherRacksBoxTF = Refs.OtherRacks.transform;
 
         WaitButton = CallWaitButtons.transform.GetChild(0).gameObject;
         PassButton = CallWaitButtons.transform.GetChild(1).gameObject;
@@ -259,8 +260,10 @@ public class TurnManager : NetworkBehaviour
 
     void C_CallTurn(int callTileID)
     {
-        MoveTile(callTileID, LocalRackTF.GetChild(0));
+        C_Expose(callTileID);
         ExposeTileName = GameManager.TileList[callTileID].name;
+
+        // FIXME: if a player puts an exposed tile back on their rack, remove it from screen
     }
 
     // TODO: during expose, add a never mind button that moves onto the next caller or passes
@@ -278,10 +281,12 @@ public class TurnManager : NetworkBehaviour
 
     void C_OtherPlayerExposes(int exposeTileID, int playerID)
     {
-        int rackID = (playerID - Runner.LocalPlayer.PlayerId + 4) % 4;
-        Transform exposePlayerRack = OtherRacksTFs[rackID];
-        Destroy(exposePlayerRack.GetChild(0).GetChild(0).gameObject);
-        MoveTile(exposeTileID, exposePlayerRack.GetChild(1));
+        int rackID = (playerID - Runner.LocalPlayer.PlayerId + 4) % 4 - 1;
+        Transform exposePlayerRack = OtherRacksBoxTF.GetChild(rackID);
+        Destroy(exposePlayerRack.GetChild(1).GetChild(0).gameObject);
+        MoveTile(exposeTileID, exposePlayerRack.GetChild(0));
+
+        // FIXME: not working
     }
 
     bool ReadyToContinue() { return true; } // TODO: later make sure it's >2 and valid group
@@ -301,4 +306,6 @@ public class TurnManager : NetworkBehaviour
     }
 
     // TODO: this class is huuuuge
+    // FIXME: when client calls host doesn't see the first exposed tile
+    // FIXME: if client exposes the same tile multiple times, more tiles get destroyed on the other clients
 }

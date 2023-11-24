@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5625574169803017176}
   - component: {fileID: 5625574169803017179}
   - component: {fileID: 5625574169803017178}
-  - component: {fileID: 5625574169803017157}
   m_Layer: 5
   m_Name: Rack - Private
   m_TagString: Untagged
@@ -104,15 +103,3 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &5625574169803017157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5625574169803017159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eabe5dcabdad0404bb9513e1cecd556a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
