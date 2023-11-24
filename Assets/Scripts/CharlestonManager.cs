@@ -124,6 +124,8 @@ public class CharlestonManager : NetworkBehaviour
         H_StartPass(info.Source.PlayerId, tileIDsToPass);
     }
 
+    // FIXME: Optional across single player isn't receiving tiles before game starts
+
     // host checks if all players have initiated the pass and does the pass if so
     void H_StartPass(int sourcePlayerId, int[] tileIDsToPass)
     {
@@ -175,7 +177,7 @@ public class CharlestonManager : NetworkBehaviour
                 RPC_H2C_SendTiles(GManager.PlayerDict[targetID], RecArr[targetID].ToArray());
             }
 
-            foreach (List<int> list in RecArr) { list.Clear(); }
+            RecArr[targetID].Clear();
         }
 
         // prep for next pass
@@ -222,7 +224,7 @@ public class CharlestonManager : NetworkBehaviour
             int countA = PassArr[i].Count;
             int countB = PassArr[i + 2].Count;
 
-            if (countA != countB)
+            if (countA == countB)
             {
                 RecArr[i] = PassArr[i + 2];
                 RecArr[i + 2] = PassArr[i];

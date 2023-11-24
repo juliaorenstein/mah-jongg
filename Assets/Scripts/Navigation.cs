@@ -158,6 +158,12 @@ public class Navigation : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (!SelectedTF)
+            {
+                Select(RackPrivate.GetChild(0));
+                return;
+            }
+
             if (Charleston.gameObject.activeInHierarchy)
             {
                 SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickCharleston();
@@ -190,11 +196,6 @@ public class Navigation : MonoBehaviour
                 InputPass();
                 return;
             }
-
-            if (!SelectedTF) {
-                Select(RackPrivate.GetChild(0));
-                return;
-            }
         }
 
         if (Input.GetKeyDown(KeyCode.Return))
@@ -202,7 +203,7 @@ public class Navigation : MonoBehaviour
             if (Charleston.gameObject.activeInHierarchy)
             {
                 ChButton.InitiatePass();
-                Unselect(); // FIXME: not unselecting?
+                Unselect();
                 return;
             }
 
