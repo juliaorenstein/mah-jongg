@@ -15,7 +15,7 @@ public class Navigation : MonoBehaviour
     private GameObject WaitButton;
     private GameObject PassButton;
     private GameObject CallButton;
-    private CallInputStruct inputStruct;
+    private NetworkCallbacks NCallbacks;
 
     private void Start()
     {
@@ -27,7 +27,7 @@ public class Navigation : MonoBehaviour
         WaitButton = Refs.CallWaitButtons.transform.GetChild(0).gameObject;
         PassButton = Refs.CallWaitButtons.transform.GetChild(1).gameObject;
         CallButton = Refs.CallWaitButtons.transform.GetChild(2).gameObject;
-        inputStruct = Refs.NetworkCallbacks.inputStruct;
+        NCallbacks = Refs.NetworkCallbacks;
     }
 
     private void Update()
@@ -130,8 +130,8 @@ public class Navigation : MonoBehaviour
 
             if (DiscardTF.GetComponentInChildren<Image>().raycastTarget)
             {
-                Unselect();
                 SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickDiscard();
+                Unselect();
                 return;
             }
 
@@ -152,8 +152,8 @@ public class Navigation : MonoBehaviour
         {
             if (Charleston.gameObject.activeInHierarchy)
             {
-                Unselect();
                 ChButton.InitiatePass();
+                Unselect();
                 return;
             }
 
@@ -206,7 +206,7 @@ public class Navigation : MonoBehaviour
 
     void InputWait()
     {
-        inputStruct.turnOptions.Set(TurnButtons.wait, true);
+        NCallbacks.inputStruct.turnOptions.Set(TurnButtons.wait, true);
         WaitButton.SetActive(false);
         PassButton.SetActive(true);
         Unselect(); // in if statement to avoid unselecting unrelated things
@@ -214,7 +214,7 @@ public class Navigation : MonoBehaviour
 
     void InputPass()
     {
-        inputStruct.turnOptions.Set(TurnButtons.pass, true);
+        NCallbacks.inputStruct.turnOptions.Set(TurnButtons.pass, true);
         PassButton.SetActive(false);
         WaitButton.SetActive(true);
         CallButton.transform.parent.gameObject.SetActive(false);
@@ -223,7 +223,7 @@ public class Navigation : MonoBehaviour
 
     void InputCall()
     {
-        inputStruct.turnOptions.Set(TurnButtons.call, true);
+        NCallbacks.inputStruct.turnOptions.Set(TurnButtons.call, true);
         Unselect();
     }
 }

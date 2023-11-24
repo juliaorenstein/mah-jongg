@@ -156,7 +156,7 @@ public class TurnManager : NetworkBehaviour
         {
             int closestPlayerDelta = PlayersCalling.Select(
                 playerID => playerID - TurnPlayerID).Min();
-            TurnPlayerID += (closestPlayerDelta + 4) % 4;
+            TurnPlayerID = (TurnPlayerID + closestPlayerDelta + 4) % 4;
 
             Call();
         }
