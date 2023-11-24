@@ -173,8 +173,9 @@ public class CharlestonManager : NetworkBehaviour
             if (GManager.PlayerDict[targetID] != PlayerRef.None) // prevent host from receiving all the AI tiles
             {
                 RPC_H2C_SendTiles(GManager.PlayerDict[targetID], RecArr[targetID].ToArray());
-                RecArr[targetID].Clear();
             }
+
+            foreach (List<int> list in RecArr) { list.Clear(); }
         }
 
         // prep for next pass

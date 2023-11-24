@@ -101,7 +101,7 @@ public class TileLocomotion : MonoBehaviour
         CManager.C_CheckDone();
     }
 
-    void DoubleClickExpose()
+    public void DoubleClickExpose()
     { TManager.C_Expose(TileID); }
 
     public void DoubleClickDiscard()
@@ -206,7 +206,7 @@ public class TileLocomotion : MonoBehaviour
         MoveTile(charlestonSpotTF);
     }
 
-    bool EligibleForExpose()
+    public bool EligibleForExpose()
     {
         return transform.IsChildOf(RackPrivateTF)
             && (TManager.ExposeTileName == transform.parent.name

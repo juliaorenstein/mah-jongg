@@ -7,7 +7,8 @@ public class Navigation : MonoBehaviour
 {
     public ObjectReferences Refs;
     private EventSystem ESystem;
-    private Transform Rack;
+    private Transform RackPrivate;
+    private Transform RackPublic;
     private Transform SelectedTF;
     private Transform Charleston;
     private CharlestonPassButton ChButton;
@@ -20,7 +21,8 @@ public class Navigation : MonoBehaviour
     private void Start()
     {
         ESystem = EventSystem.current;
-        Rack = Refs.LocalRack.transform.GetChild(1);
+        RackPrivate = Refs.LocalRack.transform.GetChild(1);
+        RackPublic = Refs.LocalRack.transform.GetChild(0);
         Charleston = Refs.Charleston;
         ChButton = Charleston.GetComponentInChildren<CharlestonPassButton>();
         DiscardTF = Refs.Discard;
@@ -36,19 +38,19 @@ public class Navigation : MonoBehaviour
         {
             if (!SelectedTF)
             {
-                Select(Rack.GetChild(0));
+                Select(RackPrivate.GetChild(0));
                 return;
             }
 
-            if (SelectedTF.IsChildOf(Rack))
+            if (SelectedTF.IsChildOf(RackPrivate))
             {
                 int ix = SelectedTF.GetSiblingIndex() + 1;
-                if (ix == Rack.childCount) { ix = 0; }
+                if (ix == RackPrivate.childCount) { ix = 0; }
 
                 // if shift is down, move tile. if not, change selection
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 { SelectedTF.SetSiblingIndex(ix); }
-                else { Select(Rack.GetChild(ix)); }
+                else { Select(RackPrivate.GetChild(ix)); }
                 return;
             }
 
@@ -69,19 +71,19 @@ public class Navigation : MonoBehaviour
         {
             if (!SelectedTF)
             {
-                Select(Rack.GetChild(0));
+                Select(RackPrivate.GetChild(0));
                 return;
             }
 
-            if (SelectedTF.IsChildOf(Rack))
+            if (SelectedTF.IsChildOf(RackPrivate))
             {
                 int ix = SelectedTF.GetSiblingIndex() - 1;
-                if (ix < 0) { ix = Rack.childCount - 1; }
+                if (ix < 0) { ix = RackPrivate.childCount - 1; }
 
                 // if shift is down, move tile. if not, change selection
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 { SelectedTF.SetSiblingIndex(ix); }
-                else { Select(Rack.GetChild(ix)); }
+                else { Select(RackPrivate.GetChild(ix)); }
                 return;
             }
 
@@ -98,24 +100,60 @@ public class Navigation : MonoBehaviour
             }
         }
 
+        // FIXME: return to pass freezes on first over?
+
         // TODO: shift + arrow to move tiles on rack
         // TODO: main gameplay support (not charleston)
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) && SelectedTF && SelectedTF.IsChildOf(Charleston))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            Select(Rack.GetChild(0));
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow) && SelectedTF
-            && SelectedTF.IsChildOf(Rack) && Charleston.gameObject.activeInHierarchy)
-        {
-            Tile charlestonTile = Charleston.GetComponentInChildren<Tile>();
-            if (charlestonTile)
+            if (!SelectedTF)
             {
-                Select(charlestonTile.transform);
+                Select(RackPrivate.GetChild(0));
                 return;
             }
+
+            if (SelectedTF.IsChildOf(Charleston)
+                || SelectedTF.IsChildOf(RackPublic))
+            {
+                Select(RackPrivate.GetChild(0));
+                return;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            if (!SelectedTF)
+            {
+                Select(RackPrivate.GetChild(0));
+                return;
+            }
+
+            if (SelectedTF.IsChildOf(RackPrivate))
+            {
+                if (Charleston.gameObject.activeInHierarchy)
+                {
+
+                    Tile charlestonTile = Charleston.GetComponentInChildren<Tile>();
+                    if (charlestonTile)
+                    {
+                        Select(charlestonTile.transform);
+                        return;
+                    }
+                }
+
+                else
+                {
+                    Tile exposedTile = RackPublic.GetComponentInChildren<Tile>();
+                    if (exposedTile)
+                    {
+                        Select(exposedTile.transform);
+                        return;
+                    }
+                }
+            }
+                
+
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -133,6 +171,14 @@ public class Navigation : MonoBehaviour
                 return;
             }
 
+            if (SelectedTF.GetComponentInChildren<TileLocomotion>().EligibleForExpose())
+            {
+                SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickExpose();
+                return;
+            }
+
+            // TODO: refactor this and TileLocomotion together
+
             if (WaitButton.activeInHierarchy)
             {
                 InputWait();
@@ -146,7 +192,7 @@ public class Navigation : MonoBehaviour
             }
 
             if (!SelectedTF) {
-                Select(Rack.GetChild(0));
+                Select(RackPrivate.GetChild(0));
                 return;
             }
         }
@@ -156,7 +202,7 @@ public class Navigation : MonoBehaviour
             if (Charleston.gameObject.activeInHierarchy)
             {
                 ChButton.InitiatePass();
-                Unselect();
+                Unselect(); // FIXME: not unselecting?
                 return;
             }
 
@@ -186,7 +232,7 @@ public class Navigation : MonoBehaviour
         }
 
         // TODO: up/down between public/private rack
-        // TODO: space bar to expose
+        // TODO: test space bar to expose
     }
 
     public void Select(Transform tileTF)
