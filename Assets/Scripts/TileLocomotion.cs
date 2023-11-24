@@ -59,9 +59,10 @@ public class TileLocomotion : MonoBehaviour
         {
             if (CharlestonBoxTF.parent.gameObject.activeSelf)
             { DoubleClickCharleston(); }
-            else if (TManager.ExposeTileName == transform.name)
+            else if (TManager.ExposeTileName == transform.parent.name
+                || (TManager.ExposeTileName != null && transform.parent.name == "Joker"))
             { DoubleClickExpose(); }
-            else if (DiscardTF.GetComponentInChildren<Image>().raycastTarget)
+            else if (DiscardTF.GetComponent<Image>().raycastTarget)
             { DoubleClickDiscard(); }
         }
     }
@@ -140,6 +141,12 @@ public class TileLocomotion : MonoBehaviour
         // discard
         else if (raycastTFs.Contains(DiscardTF))
         { TManager.C_Discard(TileID); }
+
+        // expose
+        else if (raycastTFs.Contains(RackPrivateTF.parent.GetChild(0).transform))
+        {
+            TManager.C_Expose(TileID);
+        }
 
         // otherwise, move the tile back to where it came from
         else { MoveBack(); }

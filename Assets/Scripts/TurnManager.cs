@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System;
 using UnityEngine.Windows;
+using static UnityEngine.AdaptivePerformance.Provider.AdaptivePerformanceSubsystemDescriptor;
 
 public class TurnManager : NetworkBehaviour
 {
@@ -77,6 +78,7 @@ public class TurnManager : NetworkBehaviour
     // Client discards a tile
     public void C_Discard(int discardTileID)
     {
+        ExposeTileName = null;
         RPC_C2H_Discard(discardTileID);
         DiscardTF.GetComponent<Image>().raycastTarget = false;
     }
@@ -258,25 +260,31 @@ public class TurnManager : NetworkBehaviour
     void C_CallTurn(int callTileID)
     {
         MoveTile(callTileID, LocalRackTF.GetChild(0));
-
-        // TODO: Add validation to make sure this is a legit hand? Or are players on their own
         ExposeTileName = GameManager.TileList[callTileID].name;
     }
+
+    // TODO: during expose, add a never mind button that moves onto the next caller or passes
 
     public void C_Expose(int exposeTileID)
     {
         MoveTile(exposeTileID, LocalRackTF.GetChild(0));
         RPC_C2A_Expose(exposeTileID);
-        ExposeTileName = null;
+        if (ReadyToContinue()) { DiscardTF.GetComponent<Image>().raycastTarget = true; }
     }
 
     [Rpc(RpcSources.All, RpcTargets.All, HostMode = RpcHostMode.SourceIsHostPlayer, InvokeLocal = false)]
     void RPC_C2A_Expose(int exposeTileID, RpcInfo info = default)
+    { C_OtherPlayerExposes(exposeTileID, info.Source.PlayerId); }
+
+    void C_OtherPlayerExposes(int exposeTileID, int playerID)
     {
-        Transform exposePlayerRack = OtherRacksTFs[info.Source.PlayerId];
+        int rackID = (playerID - Runner.LocalPlayer.PlayerId + 4) % 4;
+        Transform exposePlayerRack = OtherRacksTFs[rackID];
         Destroy(exposePlayerRack.GetChild(0).GetChild(0).gameObject);
         MoveTile(exposeTileID, exposePlayerRack.GetChild(1));
     }
+
+    bool ReadyToContinue() { return true; } // TODO: later make sure it's >2 and valid group
 
     void H_AITurn(int newTileID)
     {
