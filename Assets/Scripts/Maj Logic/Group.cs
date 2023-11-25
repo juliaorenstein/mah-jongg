@@ -2,37 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Group
+public class Group
 {
     public int length;
     public Kind kind;
-    public Col color;
-    public int value;
-    public Direction direction;
-    public Suit suit;
+    public Col? color;
+    public int? value;
+    public Direction? direction;
+    public Suit? suit;
 
     public static Group Create(string groupStr)
     {
-        Group group;
+        Group group = new();
         group.length = groupStr.Length - 1; // -1 because last char is color
         group.value = -1;
-        group.suit = Suit.none;
-        group.color = Col.blue;
-        group.direction = Direction.none;
 
         // figure out what kind it is
         group.kind = groupStr[0].ToString() switch
         {
-            "F" => Kind.flower,
+            "F" => Kind.flowerwind,
             "D" or "G" or "R" or "0" => Kind.dragon,
-            "N" or "E" or "W" or "S" => Kind.wind,
+            "N" or "E" or "W" or "S" => Kind.flowerwind,
             _ => Kind.number
         };
 
-        // if flower, you're done
-
-        // if wind, add direction
-        if (group.kind == Kind.wind)
+        // if flowerwind, add direction
+        if (group.kind == Kind.flowerwind)
         {
             group.direction = groupStr[0].ToString() switch
             {
@@ -40,7 +35,8 @@ public struct Group
                 "E" => Direction.east,
                 "W" => Direction.west,
                 "S" => Direction.south,
-                _ => Direction.none
+                "F" => Direction.flower,
+                _ => null
             };
         }
 
@@ -51,7 +47,8 @@ public struct Group
             {
                 "r" => Col.red,
                 "g" => Col.green,
-                _ => Col.blue
+                "b" => Col.blue,
+                _ => null
             };
 
             // if specific suit, add that
@@ -60,7 +57,7 @@ public struct Group
                 "G" => Suit.bam,
                 "R" => Suit.crak,
                 "0" => Suit.dot,
-                _ => Suit.none
+                _ => null
             };
 
             group.value = groupStr[0].ToString() switch

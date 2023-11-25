@@ -247,7 +247,6 @@ public class TileLocomotion : MonoBehaviour
         // TODO: add racklist management?
         // FIXME: newly dealt tiles should lerp from somewhere
         // FIXME: when calling a tile it flashes briefly on rack before lerping
-        // FIXME: when a tile shows on display rack it's off by a little
     }
 
     // overload without a sibling index. sends tile to last spot

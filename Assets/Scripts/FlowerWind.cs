@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class FlowerWind : MonoBehaviour, ITile
 {
-    public string Direction;
+    public Direction Direction;
     private Tile T;
 
     private void Awake()
@@ -21,7 +21,7 @@ public class FlowerWind : MonoBehaviour, ITile
 
     public string SetName()
     {
-        string name = Direction;
+        string name = Direction.ToString();
         gameObject.name = name;
         return name;
     }

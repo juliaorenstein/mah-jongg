@@ -74,8 +74,6 @@ public class TurnManager : NetworkBehaviour
         }
     }
 
-    // FIXME: call wait buttons don't show on client and also the turn doesn't seem to increment when there's a client
-
     // Client discards a tile
     public void C_Discard(int discardTileID)
     {

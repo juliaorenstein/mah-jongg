@@ -5,8 +5,7 @@ using UnityEngine.UI;
 public class NumberDragon : MonoBehaviour, ITile
 {
     public int Number { get; set; }
-    public string Suit { get; set; }
-    public static List<string> SuitList = new() { "bam", "crak", "dot" };
+    public Suit Suit { get; set; }
     private Tile T;
 
     private void Awake()
@@ -19,27 +18,16 @@ public class NumberDragon : MonoBehaviour, ITile
         string name;
         if (Number == 0)
         {
-            switch (Suit)
+            name = Suit switch
             {
-                case "bam":
-                    name = "Green";
-                    break;
-                case "crak":
-                    name = "Red";
-                    break;
-                case "dot":
-                    name = "Soap";
-                    break;
-                default:
-                    name = "Dragon - error";
-                    break;
-            }
+                Suit.bam => "Green",
+                Suit.crak => "Red",
+                Suit.dot => "Soap",
+                _ => "Dragon - error",
+            };
         }
+        else { name = $"{Number} {Suit}"; }
 
-        else
-        {
-            name = $"{Number} {Suit}";
-        }
         gameObject.name = name;
         return name;
     }

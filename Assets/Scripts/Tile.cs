@@ -1,10 +1,15 @@
 using UnityEngine;
+using System;
 
-public class Tile : MonoBehaviour
+public class Tile : MonoBehaviour, IComparable<Tile>
 {
     // GAME OBJECTS
     public ObjectReferences Refs;
     public Transform FaceTF;
+    public Kind kind;
+    public Suit? suit;
+    public int? value;
+    public Direction? direction;
 
     public int ID;
 
@@ -15,26 +20,38 @@ public class Tile : MonoBehaviour
     }
 
     // NumberDragon OVERLOAD
-    public void InitTile(int num, string suit)
+    public void InitTile(int val, Suit sui)
     {
+        kind = val == 0 ? Kind.dragon : Kind.number;
+        value = val;
+        suit = sui;
+        /*
         NumberDragon nd = gameObject.AddComponent<NumberDragon>();
         nd.Number = num;
         nd.Suit = suit;
+        */
         FinishInit();
     }
 
     // FlowerWind OVERLOAD
-    public void InitTile(string dir)
+    public void InitTile(Direction dir)
     {
+        kind = Kind.flowerwind;
+        direction = dir;
+        /*
         FlowerWind fw = gameObject.AddComponent<FlowerWind>();
         fw.Direction = dir;
+        */
         FinishInit();
     }
 
     // Joker OVERLOAD
     public void InitTile()
     {
+        kind = Kind.joker;
+        /*
         gameObject.AddComponent<Joker>();
+        */
         FinishInit();
     }
 
@@ -53,4 +70,6 @@ public class Tile : MonoBehaviour
 
     public bool IsJoker() { return name == "Joker"; }
     public static bool IsJoker(int tileID) { return tileID >= 144; }
+
+    public int CompareTo(Tile other) { return ID.CompareTo(other.ID); }
 }

@@ -6,6 +6,8 @@ public enum Pattern
 {
     exact,
     like,
+    likeEven,
+    likeOdd,
     consecutive,
     none
 }
@@ -14,8 +16,8 @@ public enum Kind
 {
     number,
     dragon,
-    flower,
-    wind
+    flowerwind,
+    joker
 }
 
 public enum Suit
@@ -39,5 +41,6 @@ public enum Direction
     east,
     west,
     south,
+    flower,
     none
 }

@@ -122,7 +122,9 @@ public class Setup : NetworkBehaviour
 
     void CreateNumberDragons()
     {
-        foreach (string suit in NumberDragon.SuitList)
+        Suit[] suits = (Suit[])Enum.GetValues(typeof(Suit));
+
+        foreach (Suit suit in suits)
         {
             for (int num = 0; num < 10; num++)
             {
@@ -136,7 +138,9 @@ public class Setup : NetworkBehaviour
 
     void CreateFlowerWinds()
     {
-        foreach (string dir in FlowerWind.DirectionList)
+        Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
+
+        foreach (Direction dir in directions)
         {
             for (int id = 1; id < 5; id++)
             {
@@ -147,7 +151,7 @@ public class Setup : NetworkBehaviour
         // AND THE LAST FOUR FLOWERS
         for (int id = 5; id < 9; id++)
         {
-            CreateOneTile().InitTile("Flower");
+            CreateOneTile().InitTile(Direction.flower);
         }
     }
 

@@ -100,11 +100,6 @@ public class Navigation : MonoBehaviour
             }
         }
 
-        // FIXME: return to pass freezes on first over?
-
-        // TODO: shift + arrow to move tiles on rack
-        // TODO: main gameplay support (not charleston)
-
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             if (!SelectedTF)

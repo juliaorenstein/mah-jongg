@@ -52,16 +52,6 @@ public class CharlestonPassButton : MonoBehaviour
             return;
         }
 
-        // TODO: blind and optional passes
-        // TODO: press space to pass 
-
-        // if it's a blind pass, allow pass whenever.
-        // otherwise, make button not interactable.
-        // if (!(counter == 2 || counter == 5))
-        // { Button.interactable = false; }
-
-        // commenting out blind pass logic here until
-        // i build it out in HostPassLogic
         Button.interactable = false;
 
         // set the direction text

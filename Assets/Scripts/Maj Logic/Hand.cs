@@ -75,7 +75,7 @@ public class Hand : MonoBehaviour
         foreach (Group group in groups)
         {
             // flowers and winds can be dealt with right away
-            if (group.kind == Kind.flower || group.kind == Kind.wind)
+            if (group.kind == Kind.flowerwind || group.kind == Kind.flowerwind)
             {
                 comboSetListForHand.Add(ComboSetForFlowerWinds(group));
             }
@@ -123,7 +123,7 @@ public class Hand : MonoBehaviour
             Direction.west => 132,
             _ => 144
         };
-        int count = group.kind == Kind.flower ? 8 : 4;
+        int count = group.kind == Kind.flowerwind ? 8 : 4;
         return ComboSetForGroup(startID, count, group.length);
     }
 
