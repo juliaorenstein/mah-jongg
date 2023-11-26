@@ -13,7 +13,7 @@ public class Hand2
     public bool closed;
     string HandStr = "FFFb 2222g FFFb 8888r exact x 25";
 
-    void BuildHand()
+    public Hand2 BuildHand()
     {
         string[] handArr = HandStr.Split(" ");
         string[] groupArr = handArr[0..^3];
@@ -27,6 +27,8 @@ public class Hand2
         {
             groups.Add(Group.Create(groupStr));
         }
+
+        return this;
     }
 
     /*

@@ -21,8 +21,8 @@ public enum Kind
 
 public enum Suit
 {
-    crak,
     bam,
+    crak,
     dot,
 }
 

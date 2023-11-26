@@ -22,8 +22,8 @@ public class GroupChecker : MonoBehaviour
     // "FFFb 2222g FFFb 8888r exact x 25"
 
     private void Start()
-    { 
-        Hand2 hand = new();
+    {
+        Hand2 hand = new Hand2().BuildHand();
         TileGroupLists = new List<List<Tile>>()
         {
             new List<Tile>()
@@ -55,10 +55,10 @@ public class GroupChecker : MonoBehaviour
         };
 
         List<Group> test = Check(hand);
-        foreach(Group testGroup in test)
-        {
-            Debug.Log(testGroup.ToString());
-        }
+
+        if (test == null) { Debug.Log("null"); }
+        else { foreach (Group testGroup in test)
+            { Debug.Log(testGroup.ToString()); } }
     }
 
     List<Group> Check(Hand2 hand)
@@ -67,28 +67,29 @@ public class GroupChecker : MonoBehaviour
         if (TileGroupLists.Select(group => group.Count).Sum() != 14) { return null; };
 
         // turn into groups
-        List<Group> tileGroups = TileGroupLists.Select(list => TileListToTileGroup(list)).ToList();
+        TileGroups = TileGroupLists.Select(list => TileListToTileGroup(list)).ToList();
 
         // split into exact groups (winds, flowers, suited dragons and numbers)
         // and inexact groups (nonsuited dragons and numbers)
         (List<Group> exactGroups, List<Group> inexactGroups) = ExtractGroups(hand);
 
         // non-suited things
-        Dictionary<Group, Group> nonSuited = MatchTileGroupsToCardGroups(exactGroups);
+        Dictionary<Group, List<Group>> nonSuited = FindCandidates(exactGroups);
         if (nonSuited == null) { return null; }
 
-        Dictionary<Group, Group> suited = SoftProperties(inexactGroups, hand.pattern);
+        Dictionary<Group, List<Group>> suited = SoftProperties(inexactGroups, hand.pattern);
         if ( suited == null) { return null; }
 
-        Dictionary<Group, Group> combinedDict = nonSuited.Concat(suited)
+        Dictionary<Group, List<Group>> combinedDict = nonSuited.Concat(suited)
             .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        Dictionary<Group, Group> resolvedDict = ResolveCandidates(combinedDict);
+        if (resolvedDict == null) { return null; }
 
         List<Group> returnVal = new();
 
         foreach (Group cardGroup in hand.groups)
-        {
-            returnVal.Add(combinedDict[cardGroup]);
-        }
+        { returnVal.Add(resolvedDict[cardGroup]); }
 
         return returnVal;
     }
@@ -129,9 +130,6 @@ public class GroupChecker : MonoBehaviour
 
         return (exactGroups, inexactGroups);
     }
-
-    Dictionary<Group, Group> MatchTileGroupsToCardGroups(List<Group> exactGroups)
-    { return ResolveCandidates(FindCandidates(exactGroups)); }
 
     Dictionary<Group, List<Group>> FindCandidates(List<Group> cardGroups)
     {
@@ -182,8 +180,8 @@ public class GroupChecker : MonoBehaviour
                 for (int j = i + 1; j < candidates.Count; j++)
                 {
                     List<Group> vals2 = candidates.Values.ElementAt(j);
-                    vals1.SequenceEqual(vals2);
-                    keysWithDupVals.Add(candidates.Keys.ElementAt(j));
+                    if (vals1.SequenceEqual(vals2))
+                    { keysWithDupVals.Add(candidates.Keys.ElementAt(j)); }
                 }
 
                 // if this check is true, that means there's, for example,
@@ -223,7 +221,7 @@ public class GroupChecker : MonoBehaviour
         return final;
     }
 
-    Dictionary<Group, Group> SoftProperties(List<Group> inexactGroups, Pattern pattern)
+    Dictionary<Group, List<Group>> SoftProperties(List<Group> inexactGroups, Pattern pattern)
     {
         if (pattern == Pattern.exact)
         { return TrySuits(inexactGroups); }
@@ -241,19 +239,19 @@ public class GroupChecker : MonoBehaviour
         return null;
     }
 
-    Dictionary<Group, Group> TrySuits(List<Group> cardGroups)
+    Dictionary<Group, List<Group>> TrySuits(List<Group> cardGroups)
     {
         foreach (List<Suit> suitCombo in SuitCombos)
         {
-            Dictionary<Group, Group> candidate = MatchTileGroupsToCardGroups(
+            Dictionary<Group, List<Group>> candidates = FindCandidates(
                 TmpSuitedCardGroups(cardGroups, suitCombo));
 
-            if (candidate != null) { return candidate; }
+            if (candidates != null) { return candidates; }
         }
         return null;
     }
 
-    Dictionary<Group, Group> EvalLikeHand(List<Group> groups, Pattern pattern)
+    Dictionary<Group, List<Group>> EvalLikeHand(List<Group> groups, Pattern pattern)
     {
         int likeVal = LikeHandVal();
         if (likeVal < 0) { return null; }
@@ -289,14 +287,19 @@ public class GroupChecker : MonoBehaviour
         return likeVal;
     }
 
-    Dictionary<Group, Group> EvalConsecHand(List<Group> cardGroups)
+    Dictionary<Group, List<Group>> EvalConsecHand(List<Group> cardGroups)
     {
         int minVal = ConsecHandMin();
         if (minVal < 0) { return null; }
         
         List<Group> tmpExactGroups = new(cardGroups);
         foreach (Group group in cardGroups)
-        { if (group.value != null) { group.value += minVal - 1; } }
+        { if (group.value != null)
+            {
+                group.value += minVal - 1;
+                if (group.value > 9) { return null; }
+            }
+        }
 
         return TrySuits(tmpExactGroups);
     }

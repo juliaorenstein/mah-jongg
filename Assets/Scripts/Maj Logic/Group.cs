@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 
 public class Group
 {
@@ -15,7 +13,6 @@ public class Group
     {
         Group group = new();
         group.length = groupStr.Length - 1; // -1 because last char is color
-        group.value = -1;
 
         // figure out what kind it is
         group.kind = groupStr[0].ToString() switch
@@ -63,7 +60,7 @@ public class Group
             group.value = groupStr[0].ToString() switch
             {
                 "D" or "G" or "R" or "0" => 0,
-                _ => groupStr[0]
+                _ => int.Parse(groupStr[0].ToString())
             };
         }
 
@@ -72,11 +69,11 @@ public class Group
 
     public override string ToString()
     {
-        return $"Group\n" +
-            $"Kind: {kind}\n" +
-            $"Suit: {suit}\n" +
-            $"Val: {value}\n" +
-            $"Direction: {direction}\n" +
+        return $"Group - " +
+            $"Kind: {kind} - " +
+            $"Suit: {suit} - " +
+            $"Val: {value} - " +
+            $"Direction: {direction} - " +
             $"Length: {length}";
     }
 }
