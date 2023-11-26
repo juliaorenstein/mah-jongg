@@ -11,13 +11,14 @@ public class FlowerWind : MonoBehaviour, ITile
     {
         T = GetComponent<Tile>();
     }
-
+    /*
     public static List<string> DirectionList =
         new() { "North", "South", "East", "West", "Flower" };
 
     public static List<string> FlowerLIst =
         new() { "Spring", "Summer", "Autumn", "Winter",
         "Bamboo", "Chrys", "Orchid", "Plumb" };
+    */
 
     public string SetName()
     {

@@ -4,7 +4,6 @@ using System;
 public class Tile : MonoBehaviour, IComparable<Tile>
 {
     // GAME OBJECTS
-    public ObjectReferences Refs;
     public Transform FaceTF;
     public Kind kind;
     public Suit? suit;
@@ -15,44 +14,41 @@ public class Tile : MonoBehaviour, IComparable<Tile>
 
     private void Awake()
     {
-        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
         FaceTF = transform.GetChild(0);
     }
 
     // NumberDragon OVERLOAD
-    public void InitTile(int val, Suit sui)
+    public Tile InitTile(int val, Suit sui)
     {
         kind = val == 0 ? Kind.dragon : Kind.number;
         value = val;
         suit = sui;
-        /*
-        NumberDragon nd = gameObject.AddComponent<NumberDragon>();
-        nd.Number = num;
-        nd.Suit = suit;
-        */
+        gameObject.AddComponent<NumberDragon>();
+        
         FinishInit();
+        return this;
     }
 
     // FlowerWind OVERLOAD
-    public void InitTile(Direction dir)
+    public Tile InitTile(Direction dir)
     {
         kind = Kind.flowerwind;
         direction = dir;
-        /*
-        FlowerWind fw = gameObject.AddComponent<FlowerWind>();
-        fw.Direction = dir;
-        */
+        
+        gameObject.AddComponent<FlowerWind>();
+        
         FinishInit();
+        return this;
     }
 
     // Joker OVERLOAD
-    public void InitTile()
+    public Tile InitTile()
     {
         kind = Kind.joker;
-        /*
+        
         gameObject.AddComponent<Joker>();
-        */
         FinishInit();
+        return this;
     }
 
     public void FinishInit()

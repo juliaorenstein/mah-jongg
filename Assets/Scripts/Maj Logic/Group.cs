@@ -69,4 +69,14 @@ public class Group
 
         return group;
     }
+
+    public override string ToString()
+    {
+        return $"Group\n" +
+            $"Kind: {kind}\n" +
+            $"Suit: {suit}\n" +
+            $"Val: {value}\n" +
+            $"Direction: {direction}\n" +
+            $"Length: {length}";
+    }
 }

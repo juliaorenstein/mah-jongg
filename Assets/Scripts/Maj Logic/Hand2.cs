@@ -29,6 +29,7 @@ public class Hand2
         }
     }
 
+    /*
     void CheckTilesAgainstHand(List<Tile> tiles)
     {
         if (tiles.Count != 14) { return; } // definitely not a maj if not 14 tiles
@@ -42,7 +43,7 @@ public class Hand2
         }
     }
 
-
+    
     List<Tile> GetFlowerWinds(Direction dir, int count, List<Tile> tiles)
     {
         List<Tile> outList = new();
@@ -63,4 +64,5 @@ public class Hand2
     }
 
     bool JokersAllowed(int count) { return count > 2; }
+    */
 }

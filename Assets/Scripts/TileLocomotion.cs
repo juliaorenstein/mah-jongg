@@ -38,7 +38,7 @@ public class TileLocomotion : MonoBehaviour
 
     private void Awake()
     {
-        Refs = GetComponentInParent<Tile>().Refs;
+        Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
         GManager = Refs.Managers.GetComponent<GameManager>();
         CManager = Refs.Managers.GetComponent<CharlestonManager>();
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();

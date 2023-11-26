@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System;
 using System.Linq;
+using UnityEngine;
 
-public class GroupChecker
+public class GroupChecker : MonoBehaviour
 {
     List<List<Tile>> TileGroupLists; // the groups of tiles that a user has displayed
     List<Group> TileGroups;
+    public GameObject TilePF;
     static List<List<Suit>> SuitCombos = new()
     {
         new() { Suit.bam,   Suit.crak,  Suit.dot    },
@@ -18,10 +19,52 @@ public class GroupChecker
         new() { Suit.dot,   Suit.crak,  Suit.bam    }
     };
 
+    // "FFFb 2222g FFFb 8888r exact x 25"
+
+    private void Start()
+    { 
+        Hand2 hand = new();
+        TileGroupLists = new List<List<Tile>>()
+        {
+            new List<Tile>()
+            {
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower)
+            },
+            new()
+            {
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(2, Suit.bam),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(2, Suit.bam),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(2, Suit.bam),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(2, Suit.bam),
+            },
+            new()
+            {
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(Direction.flower)
+            },
+            new()
+            {
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(8, Suit.crak),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(8, Suit.crak),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(8, Suit.crak),
+                Instantiate(TilePF).GetComponent<Tile>().InitTile(2, Suit.bam),
+            }
+        };
+
+        List<Group> test = Check(hand);
+        foreach(Group testGroup in test)
+        {
+            Debug.Log(testGroup.ToString());
+        }
+    }
+
     List<Group> Check(Hand2 hand)
     {
         // if the hand doesn't have 14 tiles, quit out
-        if (TileGroupLists.Select(group => group.Count).Sum() != 14) { return false; };
+        if (TileGroupLists.Select(group => group.Count).Sum() != 14) { return null; };
 
         // turn into groups
         List<Group> tileGroups = TileGroupLists.Select(list => TileListToTileGroup(list)).ToList();
