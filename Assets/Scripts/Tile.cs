@@ -1,5 +1,7 @@
 using UnityEngine;
 using System;
+using Unity.VisualScripting;
+using UnityEngine.UI;
 
 public class Tile : MonoBehaviour, IComparable<Tile>
 {
@@ -23,8 +25,7 @@ public class Tile : MonoBehaviour, IComparable<Tile>
         kind = val == 0 ? Kind.dragon : Kind.number;
         value = val;
         suit = sui;
-        gameObject.AddComponent<NumberDragon>();
-        
+
         FinishInit();
         return this;
     }
@@ -34,9 +35,7 @@ public class Tile : MonoBehaviour, IComparable<Tile>
     {
         kind = Kind.flowerwind;
         direction = dir;
-        
-        gameObject.AddComponent<FlowerWind>();
-        
+
         FinishInit();
         return this;
     }
@@ -45,17 +44,77 @@ public class Tile : MonoBehaviour, IComparable<Tile>
     public Tile InitTile()
     {
         kind = Kind.joker;
-        
-        gameObject.AddComponent<Joker>();
+
         FinishInit();
         return this;
     }
 
     public void FinishInit()
     {
-        string name = GetComponent<ITile>().SetName();
-        GetComponent<ITile>().SetFace(name);
+        SetName();
+        SetFace();
         transform.GetChild(0).name = gameObject.name + " face";
+    }
+
+
+    void SetName()
+    {
+        switch (kind)
+        {
+            case Kind.flowerwind:
+                SetFlowerWindName();
+                break;
+            case Kind.number:
+                SetNumberName();
+                break;
+            case Kind.dragon:
+                SetDragonName();
+                break;
+            case Kind.joker:
+                SetJokerName();
+                break;
+            default:
+                break;
+        };
+    }
+
+    void SetFlowerWindName()
+    { gameObject.name = Enum.GetName(typeof(Direction), direction); }
+
+    void SetNumberName()
+    { gameObject.name = $"{value} {suit}"; }
+
+    void SetDragonName()
+    {
+        gameObject.name = suit switch
+        {
+            Suit.bam => "Green",
+            Suit.crak => "Red",
+            Suit.dot => "Soap",
+            _ => "Dragon - error",
+        };
+    }
+
+    void SetJokerName()
+    { gameObject.name = "Joker"; }
+
+
+    public void SetFace()
+    {
+        string spriteName;
+
+        if (gameObject.name == "Flower")
+            spriteName = ID switch
+            {
+                136 => "Spring", 137 => "Summer", 138 => "Autumn",
+                139 => "Winter", 140 => "Bamboo", 141 => "Chrys",
+                142 => "Orchid", 143 => "Plumb", _ => "Error"
+            };
+
+        else { spriteName = name; }
+
+        GetComponentInChildren<Image>().sprite
+                = Resources.Load<Sprite>($"Tile Faces/{spriteName}");
     }
 
     // just points over to child's TileLocomotion component's MoveTile

@@ -9,7 +9,6 @@ public enum Pattern
     likeEven,
     likeOdd,
     consecutive,
-    none
 }
 
 public enum Kind
@@ -25,7 +24,6 @@ public enum Suit
     crak,
     bam,
     dot,
-    none
 }
 
 public enum Col
@@ -42,5 +40,4 @@ public enum Direction
     west,
     south,
     flower,
-    none
 }

@@ -153,6 +153,20 @@ public class Navigation : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            // TODO: refactor this and TileLocomotion together
+
+            if (WaitButton.activeInHierarchy)
+            {
+                InputWait();
+                return;
+            }
+
+            if (PassButton.activeInHierarchy)
+            {
+                InputPass();
+                return;
+            }
+
             if (!SelectedTF)
             {
                 Select(RackPrivate.GetChild(0));
@@ -175,20 +189,6 @@ public class Navigation : MonoBehaviour
             if (SelectedTF.GetComponentInChildren<TileLocomotion>().EligibleForExpose())
             {
                 SelectedTF.GetComponentInChildren<TileLocomotion>().DoubleClickExpose();
-                return;
-            }
-
-            // TODO: refactor this and TileLocomotion together
-
-            if (WaitButton.activeInHierarchy)
-            {
-                InputWait();
-                return;
-            }
-
-            if (PassButton.activeInHierarchy)
-            {
-                InputPass();
                 return;
             }
         }
