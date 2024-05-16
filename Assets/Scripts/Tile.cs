@@ -103,7 +103,7 @@ public class Tile : MonoBehaviour, IComparable<Tile>
     {
         string spriteName;
 
-        if (gameObject.name == "Flower")
+        if (gameObject.name == "flower")
             spriteName = ID switch
             {
                 136 => "Spring", 137 => "Summer", 138 => "Autumn",
@@ -126,5 +126,27 @@ public class Tile : MonoBehaviour, IComparable<Tile>
     public bool IsJoker() { return name == "Joker"; }
     public static bool IsJoker(int tileID) { return tileID >= 144; }
 
-    public int CompareTo(Tile other) { return ID.CompareTo(other.ID); }
+    public override bool Equals(object obj)
+    {
+        // base checks
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (obj.GetType() != GetType()) return false;
+
+        Tile that = (Tile)obj;
+        // value checks
+        if (this.kind != that.kind) return false;
+        if (this.suit != that.suit) return false;
+        if (this.value != that.value) return false;
+        if (this.direction != that.direction) return false;
+
+        // if everything above passed, then return true
+        return true;
+}
+
+    public int CompareTo(Tile that)
+    {
+        if (this.Equals(that)) return 0;
+        return ID.CompareTo(that.ID);
+    }
 }
