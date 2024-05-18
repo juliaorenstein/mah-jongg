@@ -51,7 +51,7 @@ public class Setup : NetworkBehaviour
         GManager.DealerID = 3;                    // make the server the dealer
         
         Refs.Charleston.transform.SetParent(Refs.Board.transform);
-        CreateTiles();
+        //CreateTiles();
         //WriteTilesToFile();
         HideButtons();                      // hide start buttons
         PopulateOtherRacks();               // show the other player's racks
@@ -72,6 +72,8 @@ public class Setup : NetworkBehaviour
         int[] tileArr = PrepRackForClient(player.PlayerId);
         RPC_SendRackToPlayer(player, tileArr);
     }
+
+    /*
 
     void CreateTiles()
     {
@@ -162,6 +164,7 @@ public class Setup : NetworkBehaviour
             CreateOneTile().InitTile();
         }
     }
+    */
 
     // FISHER-YATES
     public void Shuffle()
@@ -209,7 +212,7 @@ public class Setup : NetworkBehaviour
         List<int> RackTileIDs = new();
         foreach (GameObject tile in GManager.Racks[playerID])
         {
-            RackTileIDs.Add(tile.GetComponent<Tile>().ID);
+            RackTileIDs.Add(tile.GetComponent<TileComponent>().tile.ID);
         }
         return RackTileIDs.ToArray();
     }

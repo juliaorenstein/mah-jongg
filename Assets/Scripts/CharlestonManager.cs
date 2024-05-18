@@ -109,7 +109,7 @@ public class CharlestonManager : NetworkBehaviour
             {
                 tileTF = chSpotTF.GetChild(0);
                 tileTF.GetChild(0).GetComponent<TileLocomotion>().MoveTile(TilePoolTF);
-                tileIDsToPass.Add(tileTF.GetComponent<Tile>().ID);
+                tileIDsToPass.Add(tileTF.GetComponent<TileComponent>().tile.ID);
             }
         }
 
@@ -152,7 +152,7 @@ public class CharlestonManager : NetworkBehaviour
         for (int i = 0; i < 3; i++)
         {
             PassArr[playerID] = aiRack.GetRange(aiRack.Count - 3, 3)
-                                      .Select(tile => tile.GetComponent<Tile>().ID)
+                                      .Select(tile => tile.GetComponent<TileComponent>().tile.ID)
                                       .ToList();
         }
         PlayersReady++;

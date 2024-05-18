@@ -56,8 +56,8 @@ public class Navigation : MonoBehaviour
 
             if (SelectedTF.IsChildOf(Charleston))
             {
-                Tile SelectedTile = SelectedTF.GetComponent<Tile>();
-                Tile[] tilesInCharleston = Charleston.GetComponentsInChildren<Tile>();
+                TileComponent SelectedTile = SelectedTF.GetComponent<TileComponent>();
+                TileComponent[] tilesInCharleston = Charleston.GetComponentsInChildren<TileComponent>();
                 if (tilesInCharleston[^1] != SelectedTile)
                 {
                     int curIx = Array.IndexOf(tilesInCharleston, SelectedTile);
@@ -89,8 +89,8 @@ public class Navigation : MonoBehaviour
 
             if (SelectedTF.IsChildOf(Charleston))
             {
-                Tile SelectedTile = SelectedTF.GetComponent<Tile>();
-                Tile[] tilesInCharleston = Charleston.GetComponentsInChildren<Tile>();
+                TileComponent SelectedTile = SelectedTF.GetComponent<TileComponent>();
+                TileComponent[] tilesInCharleston = Charleston.GetComponentsInChildren<TileComponent>();
                 if (tilesInCharleston[0] != SelectedTile)
                 {
                     int curIx = Array.IndexOf(tilesInCharleston, SelectedTile);
@@ -129,7 +129,7 @@ public class Navigation : MonoBehaviour
                 if (Charleston.gameObject.activeInHierarchy)
                 {
 
-                    Tile charlestonTile = Charleston.GetComponentInChildren<Tile>();
+                    TileComponent charlestonTile = Charleston.GetComponentInChildren<TileComponent>();
                     if (charlestonTile)
                     {
                         Select(charlestonTile.transform);
@@ -139,7 +139,7 @@ public class Navigation : MonoBehaviour
 
                 else
                 {
-                    Tile exposedTile = RackPublic.GetComponentInChildren<Tile>();
+                    TileComponent exposedTile = RackPublic.GetComponentInChildren<TileComponent>();
                     if (exposedTile)
                     {
                         Select(exposedTile.transform);

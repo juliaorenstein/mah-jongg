@@ -70,7 +70,7 @@ public class TurnManager : NetworkBehaviour
         }
         else if (GManager.PlayerDict[GManager.DealerID] == PlayerRef.None && Runner.IsServer)
         {
-            H_AITurn(GManager.Racks[GManager.DealerID].Last().GetComponent<Tile>().ID);
+            H_AITurn(GManager.Racks[GManager.DealerID].Last().GetComponent<TileComponent>().tile.ID);
         }
     }
 

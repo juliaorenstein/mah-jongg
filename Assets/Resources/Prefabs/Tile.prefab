@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 828321254025056997}
   - component: {fileID: 5082096183385548446}
   - component: {fileID: 5052037981564901848}
-  - component: {fileID: -6318090039502881206}
+  - component: {fileID: 8149507421443312139}
   m_Layer: 5
   m_Name: Tile
   m_TagString: Tile
@@ -62,7 +62,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AspectMode: 2
   m_AspectRatio: 0.75
---- !u!114 &-6318090039502881206
+--- !u!114 &8149507421443312139
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,12 +71,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1001037642325796675}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 387793736b292481999ba002d7731627, type: 3}
+  m_Script: {fileID: 11500000, guid: cf4550ed83f0d4cb4b275f099a134564, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Refs: {fileID: 0}
   FaceTF: {fileID: 0}
-  ID: 0
 --- !u!1 &2298725526791933297
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -39,8 +38,8 @@ public class TileLocomotion : MonoBehaviour
     private void Awake()
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
-        GManager = Refs.Managers.GetComponent<GameManager>();
-        CManager = Refs.Managers.GetComponent<CharlestonManager>();
+        //GManager = Refs.Managers.GetComponent<GameManager>();
+        //CManager = Refs.Managers.GetComponent<CharlestonManager>();
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();
         TileTF = transform.parent;
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
@@ -50,13 +49,13 @@ public class TileLocomotion : MonoBehaviour
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
-        TManager = Refs.Managers.GetComponent<TurnManager>();
+        //TManager = Refs.Managers.GetComponent<TurnManager>();
         RebuildLayoutTransforms = new() { DiscardTF, RackPrivateTF, RackPublicTF };
     }
 
     private void Start()
     {
-        TileID = GetComponentInParent<Tile>().ID;
+        TileID = GetComponentInParent<TileComponent>().tile.ID;
         foreach ( Transform rack in OtherRacksTF )
         {
             RebuildLayoutTransforms.Add(rack.GetChild(0));
