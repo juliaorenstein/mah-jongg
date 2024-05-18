@@ -126,10 +126,15 @@ public class Tile : MonoBehaviour, IComparable<Tile>
     public bool IsJoker() { return name == "Joker"; }
     public static bool IsJoker(int tileID) { return tileID >= 144; }
 
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(kind, suit, value, direction);
+    }
+
     public override bool Equals(object obj)
     {
         // base checks
-        if (this == obj) return true;
+        if (this == (object)obj) return true;
         if (obj == null) return false;
         if (obj.GetType() != GetType()) return false;
 
