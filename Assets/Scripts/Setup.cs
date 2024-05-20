@@ -16,7 +16,6 @@ public class Setup : NetworkBehaviour
     private CharlestonPassButton PassButtonScript;
 
     // PREFABS
-    private GameObject TilePF;
     private GameObject TileBackPF;
     private GameObject InputObjectPF;
 
@@ -39,9 +38,16 @@ public class Setup : NetworkBehaviour
         TilePool = Refs.TilePool.transform;
         LocalRackPrivateTF = Refs.LocalRack.transform.GetChild(1);
         OtherRacksTF = Refs.OtherRacks.transform;
-        TilePF = Resources.Load<GameObject>("Prefabs/Tile");
         TileBackPF = Resources.Load<GameObject>("Prefabs/Tile Back");
         InputObjectPF = Resources.Load<GameObject>("Prefabs/Input Object");
+        foreach (Transform tileTF in TilePool)
+        {
+            tileList.Add(tileTF.gameObject);
+            // create reference list for everyone
+            GameManager.TileList = tileList.AsReadOnly();
+            // add locomotive abilities
+            tileTF.GetChild(0).gameObject.AddComponent<TileLocomotion>();
+        }
         C_Setup();
     }
 
@@ -51,8 +57,6 @@ public class Setup : NetworkBehaviour
         GManager.DealerID = 3;                    // make the server the dealer
         
         Refs.Charleston.transform.SetParent(Refs.Board.transform);
-        //CreateTiles();
-        //WriteTilesToFile();
         HideButtons();                      // hide start buttons
         PopulateOtherRacks();               // show the other player's racks
         

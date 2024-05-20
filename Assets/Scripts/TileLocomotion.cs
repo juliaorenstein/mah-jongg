@@ -13,7 +13,7 @@ public class TileLocomotion : MonoBehaviour
     , IEndDragHandler
 {
     private ObjectReferences Refs;
-    private GameManager GManager;
+    //private GameManager GManager;
     private CharlestonManager CManager;
     private EventSystem ESystem;
     public Transform TileTF;
@@ -38,8 +38,6 @@ public class TileLocomotion : MonoBehaviour
     private void Awake()
     {
         Refs = GameObject.Find("ObjectReferences").GetComponent<ObjectReferences>();
-        //GManager = Refs.Managers.GetComponent<GameManager>();
-        //CManager = Refs.Managers.GetComponent<CharlestonManager>();
         ESystem = Refs.EventSystem.GetComponent<EventSystem>();
         TileTF = transform.parent;
         RackPrivateTF = Refs.LocalRack.transform.GetChild(1);
@@ -49,12 +47,14 @@ public class TileLocomotion : MonoBehaviour
         DraggingTF = Refs.Dragging.transform;
         CharlestonBoxTF = Refs.Charleston.GetChild(0);
         DiscardTF = Refs.Discard.transform;
-        //TManager = Refs.Managers.GetComponent<TurnManager>();
         RebuildLayoutTransforms = new() { DiscardTF, RackPrivateTF, RackPublicTF };
     }
 
     private void Start()
     {
+        //GManager = Refs.Managers.GetComponent<GameManager>();
+        CManager = Refs.Managers.GetComponent<CharlestonManager>();
+        TManager = Refs.Managers.GetComponent<TurnManager>();
         TileID = GetComponentInParent<TileComponent>().tile.ID;
         foreach ( Transform rack in OtherRacksTF )
         {

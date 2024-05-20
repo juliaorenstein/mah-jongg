@@ -48,7 +48,7 @@ public class NetworkCallbacks : MonoBehaviour
             GameMode = mode,
             SessionName = "Mah Jongg Room",
             Scene = SceneManager.GetActiveScene().buildIndex,
-            // SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
             PlayerCount = 4
         });
 

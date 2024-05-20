@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CoverageReport scope="Summary">
   <Summary>
-    <Generatedon>19/05/2024 - 22:50:33</Generatedon>
-    <Parser>MultiReportParser (2x OpenCoverParser)</Parser>
+    <Generatedon>20/05/2024 - 08:15:24</Generatedon>
+    <Parser>MultiReportParser (4x OpenCoverParser)</Parser>
     <Assemblies>6</Assemblies>
     <Classes>194</Classes>
     <Files>95</Files>
-    <Coveredlines>326</Coveredlines>
-    <Uncoveredlines>18107</Uncoveredlines>
-    <Coverablelines>18433</Coverablelines>
-    <Totallines>34885</Totallines>
-    <Linecoverage>1.7</Linecoverage>
+    <Coveredlines>623</Coveredlines>
+    <Uncoveredlines>17905</Uncoveredlines>
+    <Coverablelines>18528</Coverablelines>
+    <Totallines>34895</Totallines>
+    <Linecoverage>3.3</Linecoverage>
     <Coveredbranches>0</Coveredbranches>
     <Totalbranches>0</Totalbranches>
-    <Coveredmethods>29</Coveredmethods>
-    <Totalmethods>1739</Totalmethods>
-    <Methodcoverage>1.6</Methodcoverage>
+    <Coveredmethods>61</Coveredmethods>
+    <Totalmethods>1755</Totalmethods>
+    <Methodcoverage>3.4</Methodcoverage>
   </Summary>
   <Coverage>
     <Assembly name="Assembly-CSharp" classes="69" coverage="0" coveredlines="0" coverablelines="6252" totallines="12692" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="570" methodcoverage="0">
@@ -92,10 +92,10 @@
     <Assembly name="Assembly-CSharp-Editor" classes="1" coverage="0" coveredlines="0" coverablelines="59" totallines="90" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="7" methodcoverage="0">
       <Class name="TileGenerator" coverage="0" coveredlines="0" coverablelines="59" totallines="90" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="7" methodcoverage="0" />
     </Assembly>
-    <Assembly name="EditorTests" classes="1" coverage="88" coveredlines="96" coverablelines="109" totallines="268" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="12" totalmethods="12" methodcoverage="100">
-      <Class name="MajTests" coverage="88" coveredlines="96" coverablelines="109" totallines="268" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="12" totalmethods="12" methodcoverage="100" />
+    <Assembly name="EditorTests" classes="1" coverage="93.3" coveredlines="154" coverablelines="165" totallines="285" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="23" totalmethods="23" methodcoverage="100">
+      <Class name="MajTests" coverage="93.3" coveredlines="154" coverablelines="165" totallines="285" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="23" totalmethods="23" methodcoverage="100" />
     </Assembly>
-    <Assembly name="Fusion.Editor" classes="81" coverage="0" coveredlines="0" coverablelines="6816" totallines="938692" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="586" methodcoverage="0">
+    <Assembly name="Fusion.Editor" classes="81" coverage="2.2" coveredlines="156" coverablelines="6816" totallines="938692" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="15" totalmethods="586" methodcoverage="2.5">
       <Class name="Fusion.Editor.AccuracyDefaultsDrawer" coverage="0" coveredlines="0" coverablelines="139" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="11" methodcoverage="0" />
       <Class name="Fusion.Editor.AccuracyDrawer" coverage="0" coveredlines="0" coverablelines="106" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="5" methodcoverage="0" />
       <Class name="Fusion.Editor.AccuracyRangeDrawer" coverage="0" coveredlines="0" coverablelines="5" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
@@ -125,8 +125,8 @@
       <Class name="Fusion.Editor.FusionGUIStyles" coverage="0" coveredlines="0" coverablelines="301" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="26" methodcoverage="0" />
       <Class name="Fusion.Editor.FusionHubWindow" coverage="0" coveredlines="0" coverablelines="322" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="32" methodcoverage="0" />
       <Class name="Fusion.Editor.FusionInstaller" coverage="0" coveredlines="0" coverablelines="18" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
-      <Class name="Fusion.Editor.FusionSettingsPostProcessor" coverage="0" coveredlines="0" coverablelines="3" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
-      <Class name="Fusion.Editor.FusionWeaverTriggerImporter" coverage="0" coveredlines="0" coverablelines="43" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="Fusion.Editor.FusionSettingsPostProcessor" coverage="100" coveredlines="3" coverablelines="3" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="1" methodcoverage="100" />
+      <Class name="Fusion.Editor.FusionWeaverTriggerImporter" coverage="11.6" coveredlines="5" coverablelines="43" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="3" methodcoverage="33.3" />
       <Class name="Fusion.Editor.ILWeaverUtils" coverage="0" coveredlines="0" coverablelines="4" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="Fusion.Editor.InlineEditorAttributeDrawer" coverage="0" coveredlines="0" coverablelines="21" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
       <Class name="Fusion.Editor.InlineHelpAttributeDrawer" coverage="0" coveredlines="0" coverablelines="91" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="8" methodcoverage="0" />
@@ -134,9 +134,9 @@
       <Class name="Fusion.Editor.NetworkBehaviourEditor" coverage="0" coveredlines="0" coverablelines="113" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="5" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkBoolDrawer" coverage="0" coveredlines="0" coverablelines="11" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkMecanimAnimatorEditor" coverage="0" coveredlines="0" coverablelines="8" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
-      <Class name="Fusion.Editor.NetworkObjectEditor" coverage="0" coveredlines="0" coverablelines="247" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="6" methodcoverage="0" />
+      <Class name="Fusion.Editor.NetworkObjectEditor" coverage="29.5" coveredlines="73" coverablelines="247" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="3" totalmethods="6" methodcoverage="50" />
       <Class name="Fusion.Editor.NetworkObjectGuidDrawer" coverage="0" coveredlines="0" coverablelines="37" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
-      <Class name="Fusion.Editor.NetworkObjectPostprocessor" coverage="0" coveredlines="0" coverablelines="141" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="12" methodcoverage="0" />
+      <Class name="Fusion.Editor.NetworkObjectPostprocessor" coverage="19.8" coveredlines="28" coverablelines="141" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="4" totalmethods="12" methodcoverage="33.3" />
       <Class name="Fusion.Editor.NetworkPrefabAssetDrawer" coverage="0" coveredlines="0" coverablelines="39" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkPrefabAssetEditor" coverage="0" coveredlines="0" coverablelines="90" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="8" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkPrefabAssetFactoryResource" coverage="0" coveredlines="0" coverablelines="16" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
@@ -145,9 +145,9 @@
       <Class name="Fusion.Editor.NetworkPrefabRefDrawer" coverage="0" coveredlines="0" coverablelines="66" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkPrefabSourceFactory" coverage="0" coveredlines="0" coverablelines="39" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkProjectConfigAssetEditor" coverage="0" coveredlines="0" coverablelines="28" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
-      <Class name="Fusion.Editor.NetworkProjectConfigImporter" coverage="0" coveredlines="0" coverablelines="106" totallines="183" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="6" methodcoverage="0" />
+      <Class name="Fusion.Editor.NetworkProjectConfigImporter" coverage="3.7" coveredlines="4" coverablelines="106" totallines="183" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="6" methodcoverage="16.6" />
       <Class name="Fusion.Editor.NetworkProjectConfigImporterEditor" coverage="0" coveredlines="0" coverablelines="74" totallines="115" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="8" methodcoverage="0" />
-      <Class name="Fusion.Editor.NetworkProjectConfigUtilities" coverage="0" coveredlines="0" coverablelines="212" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="22" methodcoverage="0" />
+      <Class name="Fusion.Editor.NetworkProjectConfigUtilities" coverage="2.3" coveredlines="5" coverablelines="212" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="22" methodcoverage="4.5" />
       <Class name="Fusion.Editor.NetworkRunnerEditor" coverage="0" coveredlines="0" coverablelines="54" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkRunnerUtilities" coverage="0" coveredlines="0" coverablelines="20" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
       <Class name="Fusion.Editor.NetworkStringDrawer" coverage="0" coveredlines="0" coverablelines="40" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
@@ -167,8 +167,8 @@
       <Class name="Fusion.Editor.SerializableDictionaryDrawer" coverage="0" coveredlines="0" coverablelines="35" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
       <Class name="Fusion.Editor.SerializedPropertyUtilities" coverage="0" coveredlines="0" coverablelines="238" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="19" methodcoverage="0" />
       <Class name="Fusion.Editor.ToggleLeftAttributeDrawer" coverage="0" coveredlines="0" coverablelines="9" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
-      <Class name="Fusion.Editor.TransformPath" coverage="0" coveredlines="0" coverablelines="72" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="9" methodcoverage="0" />
-      <Class name="Fusion.Editor.TransformPathCache" coverage="0" coveredlines="0" coverablelines="35" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="Fusion.Editor.TransformPath" coverage="18" coveredlines="13" coverablelines="72" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="9" methodcoverage="11.1" />
+      <Class name="Fusion.Editor.TransformPathCache" coverage="71.4" coveredlines="25" coverablelines="35" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="3" totalmethods="3" methodcoverage="100" />
       <Class name="Fusion.Editor.TransitionInfo" coverage="0" coveredlines="0" coverablelines="9" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="Fusion.Editor.UnitAttributeDecoratorDrawer" coverage="0" coveredlines="0" coverablelines="241" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="8" methodcoverage="0" />
       <Class name="Fusion.Editor.UnityAssetGuidAttributeDrawer" coverage="0" coveredlines="0" coverablelines="47" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
@@ -178,20 +178,20 @@
       <Class name="Fusion.Editor.WarnIfAttributeDrawer" coverage="0" coveredlines="0" coverablelines="98" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="6" methodcoverage="0" />
       <Class name="Fusion.Editor.XmlDocumentation" coverage="0" coveredlines="0" coverablelines="110" totallines="12027" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="10" methodcoverage="0" />
     </Assembly>
-    <Assembly name="MajScripts" classes="21" coverage="18" coveredlines="230" coverablelines="1275" totallines="2972" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="17" totalmethods="156" methodcoverage="10.8">
+    <Assembly name="MajScripts" classes="21" coverage="23.8" coveredlines="313" coverablelines="1314" totallines="2958" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="23" totalmethods="161" methodcoverage="14.2">
       <Class name="CardGroup" coverage="100" coveredlines="9" coverablelines="9" totallines="248" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="1" methodcoverage="100" />
-      <Class name="CardHand" coverage="64.8" coveredlines="81" coverablelines="125" totallines="248" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="4" totalmethods="6" methodcoverage="66.6" />
+      <Class name="CardHand" coverage="92" coveredlines="115" coverablelines="125" totallines="248" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="5" totalmethods="6" methodcoverage="83.3" />
       <Class name="CharlestonManager" coverage="0" coveredlines="0" coverablelines="161" totallines="274" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="19" methodcoverage="0" />
       <Class name="CharlestonPassButton" coverage="0" coveredlines="0" coverablelines="29" totallines="65" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="6" methodcoverage="0" />
       <Class name="DealClient" coverage="0" coveredlines="0" coverablelines="7" totallines="24" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
       <Class name="DragTest" coverage="0" coveredlines="0" coverablelines="10" totallines="27" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
       <Class name="GameManager" coverage="0" coveredlines="0" coverablelines="11" totallines="29" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
-      <Class name="HandLogic" coverage="81.8" coveredlines="36" coverablelines="44" totallines="97" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="2" totalmethods="2" methodcoverage="100" />
+      <Class name="HandLogic" coverage="100" coveredlines="44" coverablelines="44" totallines="97" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="2" totalmethods="2" methodcoverage="100" />
       <Class name="InputCollection" coverage="0" coveredlines="0" coverablelines="9" totallines="24" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="Navigation" coverage="0" coveredlines="0" coverablelines="186" totallines="277" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="7" methodcoverage="0" />
       <Class name="NetworkCallbacks" coverage="1.8" coveredlines="1" coverablelines="54" totallines="115" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="20" methodcoverage="5" />
-      <Class name="Permutation" coverage="73.5" coveredlines="64" coverablelines="87" totallines="200" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="3" totalmethods="4" methodcoverage="75" />
-      <Class name="PermutationGroup" coverage="100" coveredlines="7" coverablelines="7" totallines="200" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="2" totalmethods="2" methodcoverage="100" />
+      <Class name="Permutation" coverage="82.6" coveredlines="100" coverablelines="121" totallines="193" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="6" totalmethods="7" methodcoverage="85.7" />
+      <Class name="PermutationGroup" coverage="100" coveredlines="12" coverablelines="12" totallines="193" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="4" totalmethods="4" methodcoverage="100" />
       <Class name="Setup" coverage="0" coveredlines="0" coverablelines="93" totallines="254" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="10" methodcoverage="0" />
       <Class name="SkipCharlestons" coverage="0" coveredlines="0" coverablelines="4" totallines="15" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
       <Class name="StartNetworkButton" coverage="0" coveredlines="0" coverablelines="8" totallines="22" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />

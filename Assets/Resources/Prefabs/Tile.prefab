@@ -75,6 +75,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FaceTF: {fileID: 0}
+  tile:
+    kind: 0
+    isVirtual: 0
+    tileComponent: {fileID: 0}
+    ID: 0
 --- !u!1 &2298725526791933297
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,7 +167,6 @@ GameObject:
   - component: {fileID: 6858557103166507500}
   - component: {fileID: 8654730322276207585}
   - component: {fileID: 7499654002693526508}
-  - component: {fileID: 8559596159032934215}
   - component: {fileID: 5565137307829153259}
   - component: {fileID: 5215893644611468141}
   m_Layer: 6
@@ -231,19 +235,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8559596159032934215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5383958311940008865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe689cd393d764fd88a11251fb16a194, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TileTF: {fileID: 0}
 --- !u!114 &5565137307829153259
 MonoBehaviour:
   m_ObjectHideFlags: 0

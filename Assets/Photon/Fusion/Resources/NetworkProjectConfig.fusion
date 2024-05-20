@@ -156,7 +156,8 @@
     "AssembliesToWeave": [
         "Assembly-CSharp",
         "Assembly-CSharp-firstpass",
-        "MajScripts"
+        "MajScripts",
+        "Fusion"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,

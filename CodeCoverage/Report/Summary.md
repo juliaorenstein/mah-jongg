@@ -1,21 +1,21 @@
 ﻿# Summary
 |||
 |:---|:---|
-| Generated on: | 19/05/2024 - 22:50:33 |
-| Parser: | MultiReportParser (2x OpenCoverParser) |
+| Generated on: | 20/05/2024 - 08:15:23 |
+| Parser: | MultiReportParser (4x OpenCoverParser) |
 | Assemblies: | 6 |
 | Classes: | 194 |
 | Files: | 95 |
-| Covered lines: | 326 |
-| Uncovered lines: | 18107 |
-| Coverable lines: | 18433 |
-| Total lines: | 34885 |
-| Line coverage: | 1.7% (326 of 18433) |
+| Covered lines: | 623 |
+| Uncovered lines: | 17905 |
+| Coverable lines: | 18528 |
+| Total lines: | 34895 |
+| Line coverage: | 3.3% (623 of 18528) |
 | Covered branches: | 0 |
 | Total branches: | 0 |
-| Covered methods: | 29 |
-| Total methods: | 1739 |
-| Method coverage: | 1.6% (29 of 1739) |
+| Covered methods: | 61 |
+| Total methods: | 1755 |
+| Method coverage: | 3.4% (61 of 1755) |
 
 |**Name**|**Covered**|**Uncovered**|**Coverable**|**Total**|**Line coverage**|**Covered**|**Total**|**Branch coverage**|**Covered**|**Total**|**Method coverage**|
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -91,9 +91,9 @@
 |ToggleRunnerVisibility|0|52|52|88|0%|0|0||0|3|0%|
 |**Assembly-CSharp-Editor**|**0**|**59**|**59**|**90**|**0%**|**0**|**0**|****|**0**|**7**|**0%**|
 |TileGenerator|0|59|59|90|0%|0|0||0|7|0%|
-|**EditorTests**|**96**|**13**|**109**|**268**|**88%**|**0**|**0**|****|**12**|**12**|**100%**|
-|MajTests|96|13|109|268|88%|0|0||12|12|100%|
-|**Fusion.Editor**|**0**|**6816**|**6816**|**938692**|**0%**|**0**|**0**|****|**0**|**586**|**0%**|
+|**EditorTests**|**154**|**11**|**165**|**285**|**93.3%**|**0**|**0**|****|**23**|**23**|**100%**|
+|MajTests|154|11|165|285|93.3%|0|0||23|23|100%|
+|**Fusion.Editor**|**156**|**6660**|**6816**|**938692**|**2.2%**|**0**|**0**|****|**15**|**586**|**2.5%**|
 |Fusion.Editor.AccuracyDefaultsDrawer|0|139|139|12027|0%|0|0||0|11|0%|
 |Fusion.Editor.AccuracyDrawer|0|106|106|12027|0%|0|0||0|5|0%|
 |Fusion.Editor.AccuracyRangeDrawer|0|5|5|12027|0%|0|0||0|1|0%|
@@ -123,8 +123,8 @@
 |Fusion.Editor.FusionGUIStyles|0|301|301|12027|0%|0|0||0|26|0%|
 |Fusion.Editor.FusionHubWindow|0|322|322|12027|0%|0|0||0|32|0%|
 |Fusion.Editor.FusionInstaller|0|18|18|12027|0%|0|0||0|1|0%|
-|Fusion.Editor.FusionSettingsPostProcessor|0|3|3|12027|0%|0|0||0|1|0%|
-|Fusion.Editor.FusionWeaverTriggerImporter|0|43|43|12027|0%|0|0||0|3|0%|
+|Fusion.Editor.FusionSettingsPostProcessor|3|0|3|12027|100%|0|0||1|1|100%|
+|Fusion.Editor.FusionWeaverTriggerImporter|5|38|43|12027|11.6%|0|0||1|3|33.3%|
 |Fusion.Editor.ILWeaverUtils|0|4|4|12027|0%|0|0||0|1|0%|
 |Fusion.Editor.InlineEditorAttributeDrawer|0|21|21|12027|0%|0|0||0|2|0%|
 |Fusion.Editor.InlineHelpAttributeDrawer|0|91|91|12027|0%|0|0||0|8|0%|
@@ -132,9 +132,9 @@
 |Fusion.Editor.NetworkBehaviourEditor|0|113|113|12027|0%|0|0||0|5|0%|
 |Fusion.Editor.NetworkBoolDrawer|0|11|11|12027|0%|0|0||0|1|0%|
 |Fusion.Editor.NetworkMecanimAnimatorEditor|0|8|8|12027|0%|0|0||0|1|0%|
-|Fusion.Editor.NetworkObjectEditor|0|247|247|12027|0%|0|0||0|6|0%|
+|Fusion.Editor.NetworkObjectEditor|73|174|247|12027|29.5%|0|0||3|6|50%|
 |Fusion.Editor.NetworkObjectGuidDrawer|0|37|37|12027|0%|0|0||0|4|0%|
-|Fusion.Editor.NetworkObjectPostprocessor|0|141|141|12027|0%|0|0||0|12|0%|
+|Fusion.Editor.NetworkObjectPostprocessor|28|113|141|12027|19.8%|0|0||4|12|33.3%|
 |Fusion.Editor.NetworkPrefabAssetDrawer|0|39|39|12027|0%|0|0||0|1|0%|
 |Fusion.Editor.NetworkPrefabAssetEditor|0|90|90|12027|0%|0|0||0|8|0%|
 |Fusion.Editor.NetworkPrefabAssetFactoryResource|0|16|16|12027|0%|0|0||0|4|0%|
@@ -143,9 +143,9 @@
 |Fusion.Editor.NetworkPrefabRefDrawer|0|66|66|12027|0%|0|0||0|2|0%|
 |Fusion.Editor.NetworkPrefabSourceFactory|0|39|39|12027|0%|0|0||0|3|0%|
 |Fusion.Editor.NetworkProjectConfigAssetEditor|0|28|28|12027|0%|0|0||0|2|0%|
-|Fusion.Editor.NetworkProjectConfigImporter|0|106|106|183|0%|0|0||0|6|0%|
+|Fusion.Editor.NetworkProjectConfigImporter|4|102|106|183|3.7%|0|0||1|6|16.6%|
 |Fusion.Editor.NetworkProjectConfigImporterEditor|0|74|74|115|0%|0|0||0|8|0%|
-|Fusion.Editor.NetworkProjectConfigUtilities|0|212|212|12027|0%|0|0||0|22|0%|
+|Fusion.Editor.NetworkProjectConfigUtilities|5|207|212|12027|2.3%|0|0||1|22|4.5%|
 |Fusion.Editor.NetworkRunnerEditor|0|54|54|12027|0%|0|0||0|2|0%|
 |Fusion.Editor.NetworkRunnerUtilities|0|20|20|12027|0%|0|0||0|3|0%|
 |Fusion.Editor.NetworkStringDrawer|0|40|40|12027|0%|0|0||0|3|0%|
@@ -165,8 +165,8 @@
 |Fusion.Editor.SerializableDictionaryDrawer|0|35|35|12027|0%|0|0||0|4|0%|
 |Fusion.Editor.SerializedPropertyUtilities|0|238|238|12027|0%|0|0||0|19|0%|
 |Fusion.Editor.ToggleLeftAttributeDrawer|0|9|9|12027|0%|0|0||0|1|0%|
-|Fusion.Editor.TransformPath|0|72|72|12027|0%|0|0||0|9|0%|
-|Fusion.Editor.TransformPathCache|0|35|35|12027|0%|0|0||0|3|0%|
+|Fusion.Editor.TransformPath|13|59|72|12027|18%|0|0||1|9|11.1%|
+|Fusion.Editor.TransformPathCache|25|10|35|12027|71.4%|0|0||3|3|100%|
 |Fusion.Editor.TransitionInfo|0|9|9|12027|0%|0|0||0|1|0%|
 |Fusion.Editor.UnitAttributeDecoratorDrawer|0|241|241|12027|0%|0|0||0|8|0%|
 |Fusion.Editor.UnityAssetGuidAttributeDrawer|0|47|47|12027|0%|0|0||0|3|0%|
@@ -175,20 +175,20 @@
 |Fusion.Editor.VersaMaskDrawer|0|90|90|12027|0%|0|0||0|5|0%|
 |Fusion.Editor.WarnIfAttributeDrawer|0|98|98|12027|0%|0|0||0|6|0%|
 |Fusion.Editor.XmlDocumentation|0|110|110|12027|0%|0|0||0|10|0%|
-|**MajScripts**|**230**|**1045**|**1275**|**2972**|**18%**|**0**|**0**|****|**17**|**156**|**10.8%**|
+|**MajScripts**|**313**|**1001**|**1314**|**2958**|**23.8%**|**0**|**0**|****|**23**|**161**|**14.2%**|
 |CardGroup|9|0|9|248|100%|0|0||1|1|100%|
-|CardHand|81|44|125|248|64.8%|0|0||4|6|66.6%|
+|CardHand|115|10|125|248|92%|0|0||5|6|83.3%|
 |CharlestonManager|0|161|161|274|0%|0|0||0|19|0%|
 |CharlestonPassButton|0|29|29|65|0%|0|0||0|6|0%|
 |DealClient|0|7|7|24|0%|0|0||0|2|0%|
 |DragTest|0|10|10|27|0%|0|0||0|3|0%|
 |GameManager|0|11|11|29|0%|0|0||0|2|0%|
-|HandLogic|36|8|44|97|81.8%|0|0||2|2|100%|
+|HandLogic|44|0|44|97|100%|0|0||2|2|100%|
 |InputCollection|0|9|9|24|0%|0|0||0|1|0%|
 |Navigation|0|186|186|277|0%|0|0||0|7|0%|
 |NetworkCallbacks|1|53|54|115|1.8%|0|0||1|20|5%|
-|Permutation|64|23|87|200|73.5%|0|0||3|4|75%|
-|PermutationGroup|7|0|7|200|100%|0|0||2|2|100%|
+|Permutation|100|21|121|193|82.6%|0|0||6|7|85.7%|
+|PermutationGroup|12|0|12|193|100%|0|0||4|4|100%|
 |Setup|0|93|93|254|0%|0|0||0|10|0%|
 |SkipCharlestons|0|4|4|15|0%|0|0||0|1|0%|
 |StartNetworkButton|0|8|8|22|0%|0|0||0|2|0%|
