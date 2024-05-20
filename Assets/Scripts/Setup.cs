@@ -5,7 +5,7 @@ using Fusion;
 using UnityEngine;
 
 
-public class Setup : NetworkBehaviour
+public class Setup : NetworkBehaviour, ISetup
 {
     // GAME OBJECTS
     public ObjectReferences Refs;
@@ -60,7 +60,7 @@ public class Setup : NetworkBehaviour
         HideButtons();                      // hide start buttons
         PopulateOtherRacks();               // show the other player's racks
         
-        if (Runner.IsServer)    // one time actiosns when the host joins
+        if (Runner.IsServer)    // one time actions when the host joins
         {
             Shuffle();
             Deal();
@@ -76,99 +76,6 @@ public class Setup : NetworkBehaviour
         int[] tileArr = PrepRackForClient(player.PlayerId);
         RPC_SendRackToPlayer(player, tileArr);
     }
-
-    /*
-
-    void CreateTiles()
-    {
-        CreateNumberDragons();
-        CreateFlowerWinds();
-        CreateJokers();
-
-        // create reference list for everyone
-        GameManager.TileList = tileList.AsReadOnly();
-    }
-
-    // for debugging
-    void WriteTilesToFile()
-    {
-        string filePath = "/Users/juliaorenstein/Unity/Maj/Tiles.txt";
-
-        try
-        {
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                foreach (GameObject tileGO in GameManager.TileList)
-                {
-                    Tile tile = tileGO.GetComponent<Tile>();
-                    string line = $"{tile.ID},{tile.name}";
-                    // Write to the file
-                    writer.WriteLine(line);
-                }
-                
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("An error occurred: " + e.Message);
-        }
-
-        
-    }
-
-    Tile CreateOneTile()
-    {
-        Tile tile = Instantiate(TilePF, TilePool).GetComponent<Tile>();
-        tile.GetComponent<Tile>().ID = TileID;
-        tileList.Add(tile.gameObject);
-        TileID++;
-
-        return tile.GetComponent<Tile>();
-    }
-
-    void CreateNumberDragons()
-    {
-        Suit[] suits = (Suit[])Enum.GetValues(typeof(Suit));
-
-        foreach (Suit suit in suits)
-        {
-            for (int num = 0; num < 10; num++)
-            {
-                for (int i = 1; i < 5; i++)
-                {
-                    CreateOneTile().InitTile(num, suit);
-                }
-            }
-        }
-    }
-
-    void CreateFlowerWinds()
-    {
-        Direction[] directions = (Direction[])Enum.GetValues(typeof(Direction));
-
-        foreach (Direction dir in directions)
-        {
-            for (int id = 1; id < 5; id++)
-            {
-                CreateOneTile().InitTile(dir);
-            }
-        }
-
-        // AND THE LAST FOUR FLOWERS
-        for (int id = 5; id < 9; id++)
-        {
-            CreateOneTile().InitTile(Direction.flower);
-        }
-    }
-
-    void CreateJokers()
-    {
-        for (int id = 1; id < 9; id++)
-        {
-            CreateOneTile().InitTile();
-        }
-    }
-    */
 
     // FISHER-YATES
     public void Shuffle()

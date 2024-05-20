@@ -4,11 +4,7 @@ using System.Linq;
 using Fusion;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System;
-using UnityEngine.Windows;
-using static UnityEngine.AdaptivePerformance.Provider.AdaptivePerformanceSubsystemDescriptor;
 
 public class TurnManager : NetworkBehaviour
 {
