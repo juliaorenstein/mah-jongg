@@ -2,19 +2,32 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
+using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 public class CardHand
 {
-    /*
     public Pattern pattern;
     public List<CardGroup> groups;
+    private int highVal;
+    private bool suitsPresent;
 
+    // FIXME: CardHand is making weird cg values. Write a test and check what's going wrong
     // constructor based on a list of CardGroups
     public CardHand(List<CardGroup> g, Pattern p)
     {
         groups = g;
         pattern = p;
+        highVal = 0;
+        suitsPresent = false;
+
+        foreach (CardGroup group in groups)
+        {
+            if (group.relVal > highVal) highVal = (int)group.relVal;
+            if (group.kind == Kind.number || group.kind == Kind.dragon) suitsPresent = true;
+        }
     }
 
     // constructor based on a string representing a card hand
@@ -24,6 +37,8 @@ public class CardHand
         string[] groupStrArr = cardHandStr.Split(" ");
         string patternStr = groupStrArr.Last();
         List<string> groupStrList = groupStrArr.Take(groupStrArr.Length - 1).ToList();
+        highVal = 0;
+        suitsPresent = false;
 
         // deal with each group
         foreach (string groupStr in groupStrList)
@@ -40,8 +55,12 @@ public class CardHand
                 'G' => new CardGroup(groupStr.Length, Kind.dragon, Col.green, null, null, true),
                 'R' => new CardGroup(groupStr.Length, Kind.dragon, Col.red, null, null, true),
                 '0' => new CardGroup(groupStr.Length, Kind.dragon, Col.blue, null, null, true),
-                _ => new CardGroup(groupStr.Length - 1, Kind.number, GetColorFromNumberStr(groupStr), first),
+                'D' => new CardGroup(groupStr.Length - 1, Kind.dragon, GetColorFromNumberStr(groupStr), 0),
+                _ => new CardGroup(groupStr.Length - 1, Kind.number, GetColorFromNumberStr(groupStr), first - '0'),
             };
+
+            if (group.relVal > highVal) highVal = (int)group.relVal;
+            if (group.kind == Kind.number || group.kind == Kind.dragon) suitsPresent = true;
 
             groups.Add(group);
         }
@@ -67,15 +86,15 @@ public class CardHand
             "like" => Pattern.like,
             "likeEven" => Pattern.likeEven,
             "likeOdd" => Pattern.likeOdd,
-            "consecutive" => Pattern.consecutive,
+            "consec" => Pattern.consecutive,
             _ => Pattern.exact,
         };
     }
 
     // given a card hand, find suit and number permutations
-    List<Permutation> Permutations()
+    public List<Permutation> PermutationsForCardHand()
     {
-        
+
         // original: FF 11111 22 33333
         // permutations:
         //  FF 11111 (bam)  22 (bam)    33333 (bam)
@@ -88,131 +107,122 @@ public class CardHand
         //  FF 33333 (crak) 44 (crak)   55555 (crak)
         //  FF 33333 (dot)  44 (dot)    55555 (dot)
         // etc...
-        
+
 
         // if there are suits in the hand, do suit permutations
 
-        // TODO: add suit check
+        List<Permutation> permList = new();
 
-        for (int suitPerm = 0; suitPerm < 6; suitPerm++)
+        // this value determines whether we cycle through suits because there
+        // are suits in this hand, or if we only do one iteration here because
+        // there aren't
+        // FIXME: number/dragon hands that have fixed suits will break here.
+        int suitPermNum = suitsPresent ? 6 : 1;
+
+        for (int suitPerm = 0; suitPerm < suitPermNum; suitPerm++)
         {
-            // if this hand is consecutive or like, then do val permutations
-            if (pattern == Pattern.consecutive ||
-                pattern == Pattern.like)
+            // when doing value permutations below, consec and like should
+            // increment by 1, and like evens/odds should increment by 2.
+            int delta = pattern switch
             {
-                for (int valPerm = 0; valPerm < 9; valPerm++)
-                {
-                    CalculatePermutation(suitPerm, valPerm);
-                }
-            }
-            // if the hand is likeEven or likeOdd, then increment vals by two
-            else if (pattern == Pattern.likeEven ||
-                pattern == Pattern.likeOdd)
+                Pattern.consecutive or Pattern.like => 1,
+                Pattern.likeEven or Pattern.likeOdd => 2,
+                _ => 0,
+            };
+
+            // if exact numbers, use 0 as the val permutation to use the literal values
+            if (pattern == Pattern.exact) permList.Add(new Permutation(this, suitPerm, 0));
+
+            // else, do value permutations
+            else for (int valPerm = 0; valPerm < 10 - highVal; valPerm += delta)
             {
-                for (int valPerm = 0; valPerm < 9; valPerm += 2)
-                {
-                    CalculatePermutation(suitPerm, valPerm);
-                }
+                permList.Add(new Permutation(this, suitPerm, valPerm));
             }
-            // else, use 0 as the val permutation to use the literal values
-            else CalculatePermutation(cardHand, suitPerm, 0);
         }
 
-        return new List<Permutation>();
+        return permList;
     }
 
-
-    // based on a card hand and values for the suit and value permutation
-    // indices, returns an exact form of the hand.
-    Permutation? CalculatePermutation(CardHand cardHand, int suitPerm, int valPerm)
+    public override bool Equals(object obj)
     {
-        Permutation perm = new() { groups = new() };
+        // base checks
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (obj.GetType() != GetType()) return false;
 
-        foreach (CardGroup cg in cardHand.groups)
+        CardHand that = (CardHand)obj;
+        // value checks
+        if (this.groups.Count != that.groups.Count) return false;
+        if (this.pattern != that.pattern) return false;
+        for (int i = 0; i < groups.Count; i++)
         {
-            // create a tile that represents the permutation of the card group
-            Tile tile = Instantiate(TilePF).GetComponent<Tile>();
-            switch (cg.kind)
-            {
-                case Kind.flowerwind:
-                    tile.InitTile((Direction)cg.dir, true);
-                    break;
-                case Kind.number:
-                case Kind.dragon:
-                    // valPerm will be 0 if it's not a consecutive hand so we don't need to check for that here
-                    int actVal = RelValToActVal((int)cg.relVal, valPerm);
-                    if (actVal == -1) return null;
-                    tile.InitTile(actVal, ColToSuit((Col)cg.col, suitPerm), true);
-                    break;
-                default:
-                    throw new Exception();
-            }
-
-            perm.groups.Add(new PermutationGroup(tile, cg.length));
+            if (!this.groups[i].Equals(that.groups[i])) return false;
         }
 
-        return perm;
-
-        // helper function to turn a color into a suit depending on iteration
-        Suit ColToSuit(Col color, int i)
-        {
-            // permutate suits
-
-            // suit = (color + i) % 3:
-            // i=0: 0-0, 1-1, 2-2 - 012
-            // i=1: 0-1, 1-2, 2-0 - 120
-            // i=2: 0-2, 1-0, 2-1 - 201
-
-            // suit = (i - color) % 3:
-            // i=3: 0-0, 1-2, 2-1 - 021
-            // i=4: 0-1, 1-0, 2-2 - 102
-            // i=5: 0-2, 1-1, 2-0 - 210
-
-            if (i < 3) return (Suit)((i + (int)color) % 3);
-            else return (Suit)((i - (int)color) % 3);
-
-            // TODO: unit tests should should the results shown above
-        }
-
-        // helper function to turn a relative number value into an absolute value
-        int RelValToActVal(int relVal, int i)
-        {
-            if (relVal == 0) return 0; // for dragons
-
-            int absVal = relVal + i;
-            if (absVal > 9) return -1; // if absVal is invalid return -1
-            return absVal;
-
-            // TODO: unit tests
-        }
+        // if all else passed, then it's a match
+        return true;
     }
 
-    bool PlayerHandSatisfiesPermutation(Permutation perm, List<Tile> playerHand)
+    public override int GetHashCode()
     {
-        List<Tile> unused = new(playerHand);
-        List<Tile> used = new();
-
-
-
-        foreach (PermutationGroup group in perm.groups)
-        {
-            List<Tile> found = unused.FindAll(tile => tile.Equals(group.tile));
-
-            if (found.Count < group.length && !group.AllowJokers())
-            {
-                return false;
-            }
-
-
-        }
-
-
-
-
-
-        return false;
+        return HashCode.Combine(groups, pattern);
     }
 
+    public override string ToString()
+    {
+        StringBuilder str = new();
+
+        foreach (CardGroup group in groups)
+        {
+            for (int i = 0; i < group.length; i++)
+            {
+                str.Append(GroupToString(group));
+                str.Append(" ");
+            }
+        }
+
+        str.Append(pattern.ToString());
+
+        return str.ToString();
+
+        static string GroupToString(CardGroup group)
+        {
+            if (group.kind == Kind.flowerwind)
+            {
+                return group.dir switch
+                {
+                    Direction.flower => "F",
+                    Direction.north => "N",
+                    Direction.east => "E",
+                    Direction.west => "W",
+                    Direction.south => "S",
+                    _ => throw new Exception("invalid direction"),
+                };
+            }
+
+            if (group.kind == Kind.number || group.kind == Kind.dragon)
+            {
+                StringBuilder tmp = new();
+                if (group.relVal > 0) tmp.Append(group.relVal.ToString()); // numbers
+                else tmp.Append("D"); // dragons
+
+
+                string tmpCol = group.col switch
+                {
+                    Col.blue => "b",
+                    Col.green => "g",
+                    Col.red => "r",
+                    _ => throw new Exception("invalid color"),
+                };
+
+                tmp.Append(tmpCol);
+
+                return tmp.ToString();
+            }
+
+            else throw new Exception("invalid tile");
+        }
+    }
 }
 
 public struct CardGroup
@@ -222,16 +232,17 @@ public struct CardGroup
     public Col? col;
     public int? relVal;
     public Direction? dir;
-    bool colIsSuit;
+    public bool colIsSuit;
 
     public CardGroup(int l, Kind k, Col? c = null, int? v = null, Direction? d = null, bool cs = false)
     {
         length = l;
         kind = k;
         col = c;
-        relVal = v; // 0 for dragons
+        relVal = v;
+        if (kind == Kind.dragon) relVal = 0; // in case anybody forgets to include that
         dir = d;
         colIsSuit = cs; // used when greens reds and 0s are specified on the card
     }
-    */
+    
 }

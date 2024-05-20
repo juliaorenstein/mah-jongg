@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using UnityEngine.UI;
 
-[System.Serializable]
+[Serializable]
 public class Tile : IComparable<Tile>
 {
     public Kind kind;
@@ -14,6 +14,11 @@ public class Tile : IComparable<Tile>
 
     public int ID;
 
+    public Tile(int? v = null, Suit? s = null, Direction? dir = null, bool virt = true)
+    {
+        SetValues(v, s, dir);
+    }
+
     public Tile(TileComponent tc, int id, int? v = null, Suit? s = null, Direction? dir = null, bool virt = false)
     {
         tileComponent = tc;
@@ -21,6 +26,13 @@ public class Tile : IComparable<Tile>
         ID = id;
         isVirtual = virt;
 
+        SetValues(v, s, dir);
+
+        tileComponent.Init();
+    }
+
+    void SetValues(int? v = null, Suit? s = null, Direction? dir = null)
+    {
         // Numbers and Dragons
         if (v != null)
         {
@@ -36,8 +48,6 @@ public class Tile : IComparable<Tile>
         }
         // Jokers
         else kind = Kind.joker;
-
-        tileComponent.Init();
     }
 
 
@@ -91,11 +101,38 @@ public class Tile : IComparable<Tile>
 
         // if everything above passed, then return true
         return true;
-}
+    }
 
     public int CompareTo(Tile that)
     {
         if (this.Equals(that)) return 0;
         return ID.CompareTo(that.ID);
+    }
+
+    public override string ToString()
+    {
+        switch (kind)
+        {
+            case Kind.flowerwind:
+                return direction.ToString();
+            case Kind.number:
+                return $"{value} {suit}";
+            case Kind.dragon:
+                switch (suit)
+                {
+                    case Suit.bam:
+                        return "Green";
+                    case Suit.crak:
+                        return "Red";
+                    case Suit.dot:
+                        return "Soap";
+                    default:
+                        throw new Exception("invalid dragon suit");
+                }
+            case Kind.joker:
+                return "Joker";
+            default:
+                throw new Exception("invalid kind");
+        }
     }
 }
