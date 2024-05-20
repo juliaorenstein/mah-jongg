@@ -26,7 +26,6 @@ public class Permutation
     public Permutation(CardHand cardHand, int suitPerm, int valPerm)
     {
         // TODO: in one-suit hands we make 6 permutations instead of 3.
-        // FIXME: Permutations is permutation R G 0 when it shouldn't be.
 
         groups = new();
 

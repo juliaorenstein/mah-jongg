@@ -1,11 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using UnityEngine;
-using static PlasticPipe.PlasticProtocol.Messages.Serialization.ItemHandlerMessagesSerialization;
 
 public class CardHand
 {
@@ -14,7 +10,6 @@ public class CardHand
     private int highVal;
     private bool suitsPresent;
 
-    // FIXME: CardHand is making weird cg values. Write a test and check what's going wrong
     // constructor based on a list of CardGroups
     public CardHand(List<CardGroup> g, Pattern p)
     {
@@ -244,5 +239,4 @@ public struct CardGroup
         dir = d;
         colIsSuit = cs; // used when greens reds and 0s are specified on the card
     }
-    
 }
